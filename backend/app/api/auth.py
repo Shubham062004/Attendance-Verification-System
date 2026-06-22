@@ -81,14 +81,14 @@ def google_auth(payload: GoogleAuthRequest, db: Session = Depends(get_db)):
         db.refresh(user)
     else:
         # Update google_id if missing or update details
-        if not user.google_id:
+        if not user.google_id and google_id is not None:
             user.google_id = google_id
         if name and not user.name:
             user.name = name
         db.commit()
         db.refresh(user)
 
-    access_token = create_access_token(user_id=user.id, role=user.role)
+    access_token = create_access_token(user_id=int(user.id), role=str(user.role))
     return TokenResponse(access_token=access_token, user=user)
 
 

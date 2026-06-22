@@ -110,4 +110,109 @@ export const apiService = {
       body: JSON.stringify({ name }),
     });
   },
+
+  // Attendance Session API calls
+  async createSession(session: {
+    title: string;
+    subject: string;
+    class_name: string;
+    description?: string;
+    start_time?: string;
+    end_time?: string;
+  }): Promise<AttendanceSession> {
+    return request<AttendanceSession>("/sessions", {
+      method: "POST",
+      body: JSON.stringify(session),
+    });
+  },
+
+  async listSessions(params?: {
+    q?: string;
+    status?: string;
+    page?: number;
+    size?: number;
+  }): Promise<AttendanceSession[]> {
+    const query = new URLSearchParams();
+    if (params?.q) query.append("q", params.q);
+    if (params?.status) query.append("status", params.status);
+    if (params?.page) query.append("page", params.page.toString());
+    if (params?.size) query.append("size", params.size.toString());
+    const queryString = query.toString();
+    return request<AttendanceSession[]>(`/sessions${queryString ? "?" + queryString : ""}`);
+  },
+
+  async getActiveSession(): Promise<AttendanceSession | null> {
+    return request<AttendanceSession | null>("/sessions/active");
+  },
+
+  async getSessionStats(): Promise<SessionStats> {
+    return request<SessionStats>("/sessions/stats");
+  },
+
+  async getSession(id: number): Promise<AttendanceSession> {
+    return request<AttendanceSession>(`/sessions/${id}`);
+  },
+
+  async updateSession(
+    id: number,
+    session: {
+      title?: string;
+      subject?: string;
+      class_name?: string;
+      description?: string;
+      start_time?: string;
+      end_time?: string;
+    },
+  ): Promise<AttendanceSession> {
+    return request<AttendanceSession>(`/sessions/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(session),
+    });
+  },
+
+  async deleteSession(id: number): Promise<{ status: string; message: string }> {
+    return request<{ status: string; message: string }>(`/sessions/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async startSession(id: number): Promise<AttendanceSession> {
+    return request<AttendanceSession>(`/sessions/${id}/start`, {
+      method: "POST",
+    });
+  },
+
+  async endSession(id: number): Promise<AttendanceSession> {
+    return request<AttendanceSession>(`/sessions/${id}/end`, {
+      method: "POST",
+    });
+  },
+
+  async reopenSession(id: number): Promise<AttendanceSession> {
+    return request<AttendanceSession>(`/sessions/${id}/reopen`, {
+      method: "POST",
+    });
+  },
 };
+
+export interface AttendanceSession {
+  id: number;
+  title: string;
+  subject: string;
+  class_name: string;
+  description: string | null;
+  session_code: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  status: "DRAFT" | "ACTIVE" | "ENDED" | "REOPENED";
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SessionStats {
+  total: number;
+  active: number;
+  ended: number;
+  draft: number;
+}

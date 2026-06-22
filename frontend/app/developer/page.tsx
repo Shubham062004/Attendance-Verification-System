@@ -1,15 +1,98 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import { ProtectedRoute } from "../../components/ProtectedRoute";
-import { ShieldAlert, LogOut, ShieldCheck, Terminal, Clock } from "lucide-react";
+import { apiService, AttendanceSession } from "../../services/api";
+import {
+  ShieldAlert,
+  LogOut,
+  ShieldCheck,
+  Terminal,
+  Clock,
+  Play,
+  Square,
+  RotateCcw,
+  Trash2,
+  Plus,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 
 function DeveloperDashboardContent() {
   const { user, logout, developerTimeRemaining } = useAuth();
+  const [testSessions, setTestSessions] = useState<AttendanceSession[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchTestSessions = async () => {
+    try {
+      const data = await apiService.listSessions({ size: 5 });
+      setTestSessions(data);
+    } catch (err) {
+      console.error("Failed to list test sessions", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTestSessions();
+  }, []);
+
+  const handleCreateMock = async () => {
+    setLoading(true);
+    try {
+      await apiService.createSession({
+        title: "Mock Lecture Session",
+        subject: "DEV-101 Sandbox",
+        class_name: "L-301 Section B",
+        description: "Auto-generated developer mock session for transition testing.",
+      });
+      fetchTestSessions();
+    } catch (err) {
+      console.error("Failed to create mock session", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStart = async (id: number) => {
+    try {
+      await apiService.startSession(id);
+      fetchTestSessions();
+    } catch (err) {
+      console.error("Failed to start session", err);
+    }
+  };
+
+  const handleEnd = async (id: number) => {
+    try {
+      await apiService.endSession(id);
+      fetchTestSessions();
+    } catch (err) {
+      console.error("Failed to end session", err);
+    }
+  };
+
+  const handleReopen = async (id: number) => {
+    try {
+      await apiService.reopenSession(id);
+      fetchTestSessions();
+    } catch (err) {
+      console.error("Failed to reopen session", err);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await apiService.deleteSession(id);
+      fetchTestSessions();
+    } catch (err) {
+      console.error("Failed to delete session", err);
+    }
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-12 text-slate-100 sm:px-6 lg:px-8">
       {/* Background gradients */}
       <div className="pointer-events-none absolute -left-1/4 -top-1/4 h-96 w-96 rounded-full bg-rose-600/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-1/4 -right-1/4 h-96 w-96 rounded-full bg-indigo-600/10 blur-3xl" />
@@ -57,6 +140,110 @@ function DeveloperDashboardContent() {
               This developer token expires automatically after 30 seconds. You will be automatically
               signed out and redirected back to the login page.
             </p>
+          </div>
+
+          {/* Sandbox Transition Controllers */}
+          <div className="glass-panel space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+              <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <Terminal className="h-4 w-4 text-indigo-400" />
+                Session Transition Testing Sandbox
+              </h3>
+              <button
+                onClick={handleCreateMock}
+                disabled={loading}
+                className="flex cursor-pointer items-center gap-1 text-[10px] font-bold text-blue-400 hover:text-blue-300 disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Plus className="h-3 w-3" />
+                )}
+                <span>Create Mock Session</span>
+              </button>
+            </div>
+
+            {testSessions.length === 0 ? (
+              <p className="text-slate-550 py-4 text-center text-xs">
+                No test sessions generated yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {testSessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className="hover:border-slate-850 flex flex-col justify-between gap-3 rounded-lg border border-slate-900 bg-slate-950/60 p-3 transition sm:flex-row sm:items-center"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-white">
+                        {session.title}{" "}
+                        <span className="text-slate-550 text-[9px] font-normal">#{session.id}</span>
+                      </div>
+                      <div className="text-slate-550 mt-0.5 text-[10px]">
+                        Status:{" "}
+                        <span className="font-semibold text-indigo-400">{session.status}</span>
+                        {session.session_code && (
+                          <>
+                            {" "}
+                            | Code:{" "}
+                            <span className="text-blue-450 font-mono font-bold">
+                              {session.session_code}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {session.status === "DRAFT" && (
+                        <button
+                          onClick={() => handleStart(session.id)}
+                          className="hover:text-emerald-350 flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-emerald-400"
+                        >
+                          <Play className="h-3 w-3" />
+                          <span>Start</span>
+                        </button>
+                      )}
+                      {(session.status === "ACTIVE" || session.status === "REOPENED") && (
+                        <button
+                          onClick={() => handleEnd(session.id)}
+                          className="hover:text-rose-350 flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-rose-400"
+                        >
+                          <Square className="h-3 w-3" />
+                          <span>End</span>
+                        </button>
+                      )}
+                      {session.status === "ENDED" && (
+                        <button
+                          onClick={() => handleReopen(session.id)}
+                          className="hover:text-purple-350 flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-purple-400"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          <span>Reopen</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(session.id)}
+                        className="flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-slate-500 hover:text-slate-400"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-end border-t border-slate-900/60 pt-2">
+              <Link
+                href="/admin/sessions"
+                className="flex items-center gap-1 text-[11px] font-bold text-indigo-400 transition hover:text-indigo-300"
+              >
+                <span>Open Main Sessions Console</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
 
           {/* Diagnostics Panel */}
