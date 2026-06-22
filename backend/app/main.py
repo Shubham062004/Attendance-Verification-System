@@ -7,6 +7,7 @@ from app.api.location import router as location_router
 from app.api.qr import router as qr_router
 from app.api.sessions import router as sessions_router
 from app.api.users import router as users_router
+from app.api.verification import router as verification_router
 from app.core.cloudinary import configure_cloudinary
 from app.core.config import settings
 from app.core.logging import logger, setup_logging
@@ -46,6 +47,7 @@ app.include_router(users_router)
 app.include_router(sessions_router)
 app.include_router(qr_router)
 app.include_router(location_router)
+app.include_router(verification_router)
 
 
 @app.on_event("startup")

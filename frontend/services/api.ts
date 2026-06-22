@@ -259,6 +259,36 @@ export const apiService = {
   async getLocationValidationById(id: number): Promise<LocationValidationResponse> {
     return request<LocationValidationResponse>(`/location/validation/${id}`);
   },
+
+  // Camera Verification APIs
+  async startVerification(sessionId: number): Promise<VerificationSessionResponse> {
+    return request<VerificationSessionResponse>("/verification/start", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+  },
+
+  async completeVerification(payload: {
+    verification_id: number;
+    camera_granted: boolean;
+    face_detected: boolean;
+    blink_verified: boolean;
+    smile_verified: boolean;
+    failure_reason?: string | null;
+  }): Promise<VerificationSessionResponse> {
+    return request<VerificationSessionResponse>("/verification/complete", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getVerification(id: number): Promise<VerificationSessionResponse> {
+    return request<VerificationSessionResponse>(`/verification/${id}`);
+  },
+
+  async getVerificationsBySession(sessionId: number): Promise<VerificationSessionResponse[]> {
+    return request<VerificationSessionResponse[]>(`/verification/session/${sessionId}`);
+  },
 };
 
 export interface AttendanceSession {
@@ -318,4 +348,20 @@ export interface LocationValidationResponse {
   is_within_radius: boolean;
   risk_score: number;
   created_at: string;
+}
+
+export interface VerificationSessionResponse {
+  id: number;
+  student_id: number;
+  session_id: number;
+  camera_granted: boolean;
+  face_detected: boolean;
+  blink_verified: boolean;
+  smile_verified: boolean;
+  liveness_passed: boolean;
+  status: "PENDING" | "IN_PROGRESS" | "PASSED" | "FAILED" | "SKIPPED";
+  failure_reason: string | null;
+  attempt_count: number;
+  started_at: string;
+  completed_at: string | null;
 }
