@@ -19,6 +19,7 @@ from app.models.audit import AuditLog # noqa
 from app.models.token import SessionToken # noqa
 from app.models.location import ClassroomLocation, LocationValidation # noqa
 from app.models.verification import VerificationSession # noqa
+from app.models.evidence import AttendanceEvidence # noqa
 target_metadata = Base.metadata
 
 # Dynamic DB URL configuration
