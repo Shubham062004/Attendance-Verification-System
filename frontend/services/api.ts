@@ -320,6 +320,26 @@ export const apiService = {
   async deleteEvidence(id: number): Promise<void> {
     await request<void>(`/evidence/${id}`, { method: "DELETE" });
   },
+
+  // Attendance Submission APIs
+  async submitAttendance(sessionId: number): Promise<AttendanceSubmitResponse> {
+    return request<AttendanceSubmitResponse>("/attendance/submit", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+  },
+
+  async getAttendanceRecord(id: number): Promise<AttendanceRecordResponse> {
+    return request<AttendanceRecordResponse>(`/attendance/${id}`);
+  },
+
+  async getSessionAttendance(sessionId: number): Promise<SessionAttendanceSummary> {
+    return request<SessionAttendanceSummary>(`/attendance/session/${sessionId}`);
+  },
+
+  async getStudentAttendance(studentId: number): Promise<AttendanceRecordResponse[]> {
+    return request<AttendanceRecordResponse[]>(`/attendance/student/${studentId}`);
+  },
 };
 
 export interface AttendanceSession {
@@ -417,4 +437,36 @@ export interface AttendanceEvidenceResponse {
   image_width: number | null;
   image_height: number | null;
   uploaded_at: string;
+}
+
+export interface AttendanceRecordResponse {
+  id: number;
+  student_id: number;
+  session_id: number;
+  location_validation_id: number | null;
+  verification_session_id: number | null;
+  evidence_id: number | null;
+  status: "PRESENT" | "FLAGGED" | "REJECTED";
+  submitted_at: string;
+  created_at: string;
+}
+
+export interface AttendanceSubmitResponse {
+  attendance_marked: boolean;
+  status: "PRESENT" | "FLAGGED" | "REJECTED";
+  record_id: number;
+  session_id: number;
+  session_title: string;
+  session_subject: string;
+  session_class: string;
+  submitted_at: string;
+}
+
+export interface SessionAttendanceSummary {
+  session_id: number;
+  total: number;
+  present: number;
+  flagged: number;
+  rejected: number;
+  records: AttendanceRecordResponse[];
 }

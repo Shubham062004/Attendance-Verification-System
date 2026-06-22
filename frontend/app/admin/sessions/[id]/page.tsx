@@ -390,6 +390,21 @@ function SessionDetailsContent({ params }: PageProps) {
                     </Link>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-500">📋</span>
+                  <div>
+                    <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Attendance Records
+                    </h5>
+                    <Link
+                      href={`/admin/sessions/${session.id}/attendance`}
+                      className="mt-0.5 inline-block text-[11px] font-bold text-emerald-400 hover:text-emerald-300 hover:underline"
+                    >
+                      View Attendance Records
+                    </Link>
+                  </div>
+                </div>
               </div>
 
               {/* Status Actions */}
