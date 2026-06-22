@@ -143,9 +143,8 @@ function StudentLocationContent({ searchParams }: PageProps) {
   };
 
   const handleSkipOrContinue = () => {
-    // Navigate to next verification step (e.g. Camera/Face scan, simulated as success screen for now)
-    alert("Location verified! Directing to biometric facial check (future branch).");
-    router.push("/attendance");
+    // Navigate to camera/liveness verification step
+    router.push(`/attendance/verification?session_id=${sessionId}`);
   };
 
   if (loading) {
