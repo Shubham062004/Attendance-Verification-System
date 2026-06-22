@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.auth import router as auth_router
 from app.api.health import router as health_router
+from app.api.users import router as users_router
 from app.core.cloudinary import configure_cloudinary
 from app.core.config import settings
 from app.core.logging import logger, setup_logging
@@ -34,8 +36,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register health check router
+# Register routers
 app.include_router(health_router)
+app.include_router(auth_router)
+app.include_router(users_router)
 
 
 @app.on_event("startup")

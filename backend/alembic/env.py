@@ -13,6 +13,7 @@ if config.config_file_name is not None:
 
 # Import base class metadata for autogenerate migrations support
 from app.db.base_class import Base
+from app.models.user import User # noqa
 target_metadata = Base.metadata
 
 # Dynamic DB URL configuration
