@@ -573,10 +573,10 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
 
               <button
                 id="continue-to-submission-btn"
-                onClick={() => router.push(`/attendance?session_id=${sessionId}`)}
+                onClick={() => router.push(`/attendance/review?session_id=${sessionId}`)}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-3 text-xs font-bold text-white transition hover:bg-emerald-500"
               >
-                <span>Continue to Attendance Submission</span>
+                <span>Review &amp; Mark Attendance</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
