@@ -347,7 +347,7 @@ function SessionDetailsContent({ params }: PageProps) {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 border-b border-t border-slate-900/60 py-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 border-b border-t border-slate-900/60 py-4 md:grid-cols-3">
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-slate-500" />
                   <div>
@@ -373,6 +373,21 @@ function SessionDetailsContent({ params }: PageProps) {
                     <p className="mt-0.5 font-mono text-sm font-bold text-blue-400">
                       {session.session_code || "Generated when session starts"}
                     </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-500">📍</span>
+                  <div>
+                    <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Geographical Boundary
+                    </h5>
+                    <Link
+                      href={`/admin/sessions/${session.id}/location`}
+                      className="mt-0.5 inline-block text-[11px] font-bold text-indigo-400 hover:text-indigo-300 hover:underline"
+                    >
+                      Configure Location Limits
+                    </Link>
                   </div>
                 </div>
               </div>

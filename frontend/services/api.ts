@@ -222,12 +222,42 @@ export const apiService = {
     });
   },
 
-  async getQrStatus(
-    token: string,
-  ): Promise<{ token: string; is_active: boolean; expired: boolean; valid: boolean }> {
-    return request<{ token: string; is_active: boolean; expired: boolean; valid: boolean }>(
-      `/qr/status/${token}`,
-    );
+  async configureClassroomLocation(
+    sessionId: number,
+    payload: { latitude: number; longitude: number; allowed_radius: number },
+  ): Promise<ClassroomLocationResponse> {
+    return request<ClassroomLocationResponse>(`/sessions/${sessionId}/location`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getClassroomLocation(sessionId: number): Promise<ClassroomLocationResponse> {
+    return request<ClassroomLocationResponse>(`/sessions/${sessionId}/location`);
+  },
+
+  async validateLocation(payload: {
+    session_id: number;
+    latitude: number | null;
+    longitude: number | null;
+    accuracy: number | null;
+  }): Promise<LocationValidationResponse> {
+    return request<LocationValidationResponse>("/location/validate", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getLocationValidationsBySession(sessionId: number): Promise<LocationValidationResponse[]> {
+    return request<LocationValidationResponse[]>(`/location/session/${sessionId}`);
+  },
+
+  async getLocationValidationsByStudent(studentId: number): Promise<LocationValidationResponse[]> {
+    return request<LocationValidationResponse[]>(`/location/student/${studentId}`);
+  },
+
+  async getLocationValidationById(id: number): Promise<LocationValidationResponse> {
+    return request<LocationValidationResponse>(`/location/validation/${id}`);
   },
 };
 
@@ -266,4 +296,26 @@ export interface QRValidateResponse {
   subject: string | null;
   class_name: string | null;
   teacher_name: string | null;
+}
+
+export interface ClassroomLocationResponse {
+  latitude: number;
+  longitude: number;
+  allowed_radius: number;
+  id: number;
+  session_id: number;
+  created_at: string;
+}
+
+export interface LocationValidationResponse {
+  id: number;
+  student_id: number;
+  session_id: number;
+  latitude: number | null;
+  longitude: number | null;
+  accuracy: number | null;
+  distance_from_center: number | null;
+  is_within_radius: boolean;
+  risk_score: number;
+  created_at: string;
 }

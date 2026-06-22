@@ -31,6 +31,67 @@ function DeveloperDashboardContent() {
   const [qrOperationLoading, setQrOperationLoading] = useState<Record<number, boolean>>({});
   const [qrStatusText, setQrStatusText] = useState<Record<number, string>>({});
 
+  const [locSessionId, setLocSessionId] = useState("");
+  const [locLat, setLocLat] = useState("");
+  const [locLng, setLocLng] = useState("");
+  const [locAcc, setLocAcc] = useState("");
+  const [locValidationResult, setLocValidationResult] = useState<any>(null);
+  const [locValidating, setLocValidating] = useState(false);
+
+  const handleValidateLocationSim = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!locSessionId) return;
+    setLocValidating(true);
+    setLocValidationResult(null);
+    try {
+      const parsedSessionId = parseInt(locSessionId, 10);
+      const parsedLat = locLat ? parseFloat(locLat) : null;
+      const parsedLng = locLng ? parseFloat(locLng) : null;
+      const parsedAcc = locAcc ? parseFloat(locAcc) : null;
+
+      const res = await apiService.validateLocation({
+        session_id: parsedSessionId,
+        latitude: parsedLat,
+        longitude: parsedLng,
+        accuracy: parsedAcc,
+      });
+      setLocValidationResult(res);
+    } catch (err: any) {
+      setLocValidationResult({ error: err.message });
+    } finally {
+      setLocValidating(false);
+    }
+  };
+
+  const setSimulationPreset = (
+    preset: "inside" | "outside" | "poor_accuracy" | "gps_failure",
+    activeSessionId: number,
+  ) => {
+    setLocSessionId(activeSessionId.toString());
+    switch (preset) {
+      case "inside":
+        setLocLat("31.2536");
+        setLocLng("75.7033");
+        setLocAcc("15");
+        break;
+      case "outside":
+        setLocLat("31.2999");
+        setLocLng("75.7999");
+        setLocAcc("15");
+        break;
+      case "poor_accuracy":
+        setLocLat("31.2536");
+        setLocLng("75.7033");
+        setLocAcc("120");
+        break;
+      case "gps_failure":
+        setLocLat("");
+        setLocLng("");
+        setLocAcc("");
+        break;
+    }
+  };
+
   const fetchTestSessions = async () => {
     try {
       const data = await apiService.listSessions({ size: 5 });
@@ -400,6 +461,214 @@ function DeveloperDashboardContent() {
                         </div>
                       </>
                     )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Location Validation Simulator Form */}
+          <div className="glass-panel space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+            <h3 className="flex items-center gap-2 border-b border-slate-900 pb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <ShieldCheck className="h-4 w-4 text-indigo-400" />
+              Classroom Geofence Simulator
+            </h3>
+
+            {/* Presets */}
+            {testSessions.filter((s) => s.status === "ACTIVE" || s.status === "REOPENED").length >
+              0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  Quick Location Presets (Session #
+                  {
+                    testSessions.filter((s) => s.status === "ACTIVE" || s.status === "REOPENED")[0]
+                      .id
+                  }
+                  )
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() =>
+                      setSimulationPreset(
+                        "inside",
+                        testSessions.filter(
+                          (s) => s.status === "ACTIVE" || s.status === "REOPENED",
+                        )[0].id,
+                      )
+                    }
+                    className="rounded border border-indigo-500/30 bg-indigo-600/20 px-2 py-1 text-[9px] font-bold text-indigo-300 hover:bg-indigo-600/30"
+                  >
+                    Simulate Inside Bounds (0 risk)
+                  </button>
+                  <button
+                    onClick={() =>
+                      setSimulationPreset(
+                        "outside",
+                        testSessions.filter(
+                          (s) => s.status === "ACTIVE" || s.status === "REOPENED",
+                        )[0].id,
+                      )
+                    }
+                    className="rounded border border-amber-500/30 bg-amber-600/20 px-2 py-1 text-[9px] font-bold text-amber-300 hover:bg-amber-600/30"
+                  >
+                    Simulate Outside Bounds (+50 risk)
+                  </button>
+                  <button
+                    onClick={() =>
+                      setSimulationPreset(
+                        "poor_accuracy",
+                        testSessions.filter(
+                          (s) => s.status === "ACTIVE" || s.status === "REOPENED",
+                        )[0].id,
+                      )
+                    }
+                    className="rounded border border-orange-500/30 bg-orange-600/20 px-2 py-1 text-[9px] font-bold text-orange-300 hover:bg-orange-600/30"
+                  >
+                    Simulate Poor Accuracy (+20 risk)
+                  </button>
+                  <button
+                    onClick={() =>
+                      setSimulationPreset(
+                        "gps_failure",
+                        testSessions.filter(
+                          (s) => s.status === "ACTIVE" || s.status === "REOPENED",
+                        )[0].id,
+                      )
+                    }
+                    className="rounded border border-rose-500/30 bg-rose-600/20 px-2 py-1 text-[9px] font-bold text-rose-300 hover:bg-rose-600/30"
+                  >
+                    Simulate GPS Failure (+100 risk)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleValidateLocationSim} className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Session ID
+                  </label>
+                  <input
+                    type="number"
+                    value={locSessionId}
+                    onChange={(e) => setLocSessionId(e.target.value)}
+                    placeholder="Session ID"
+                    required
+                    className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    GPS Accuracy (m)
+                  </label>
+                  <input
+                    type="number"
+                    value={locAcc}
+                    onChange={(e) => setLocAcc(e.target.value)}
+                    placeholder="Accuracy in meters"
+                    className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    value={locLat}
+                    onChange={(e) => setLocLat(e.target.value)}
+                    placeholder="e.g. 31.2536"
+                    className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    value={locLng}
+                    onChange={(e) => setLocLng(e.target.value)}
+                    placeholder="e.g. 75.7033"
+                    className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-1.5 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={locValidating || !locSessionId}
+                className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-indigo-600 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+              >
+                {locValidating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <span>Validate Location Coordinates</span>
+                )}
+              </button>
+            </form>
+
+            {locValidationResult && (
+              <div className="rounded-lg border border-slate-900 bg-slate-950/80 p-3 font-mono text-xs">
+                <div className="mb-2 flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  <span>Location Result Log</span>
+                  <span className="text-slate-450">ID: {locValidationResult.id}</span>
+                </div>
+                {locValidationResult.error ? (
+                  <div className="text-rose-400">Error: {locValidationResult.error}</div>
+                ) : (
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Is Within Radius:</span>
+                      <span
+                        className={
+                          locValidationResult.is_within_radius
+                            ? "font-bold text-emerald-400"
+                            : "font-bold text-rose-500"
+                        }
+                      >
+                        {locValidationResult.is_within_radius ? "TRUE" : "FALSE"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Risk Score:</span>
+                      <span
+                        className={
+                          locValidationResult.risk_score > 0
+                            ? "font-bold text-rose-400"
+                            : "font-bold text-emerald-400"
+                        }
+                      >
+                        {locValidationResult.risk_score} / 100
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Distance from Center:</span>
+                      <span>
+                        {locValidationResult.distance_from_center?.toFixed(1) || "N/A"} meters
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Coordinates:</span>
+                      <span>
+                        {locValidationResult.latitude?.toFixed(5) || "None"},{" "}
+                        {locValidationResult.longitude?.toFixed(5) || "None"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">GPS Accuracy:</span>
+                      <span>
+                        {locValidationResult.accuracy != null
+                          ? `±${locValidationResult.accuracy.toFixed(1)}m`
+                          : "None"}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
