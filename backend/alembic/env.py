@@ -17,6 +17,7 @@ from app.models.user import User # noqa
 from app.models.session import AttendanceSession # noqa
 from app.models.audit import AuditLog # noqa
 from app.models.token import SessionToken # noqa
+from app.models.location import ClassroomLocation, LocationValidation # noqa
 target_metadata = Base.metadata
 
 # Dynamic DB URL configuration

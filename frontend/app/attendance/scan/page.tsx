@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "../../../components/ProtectedRoute";
 import { apiService, QRValidateResponse } from "../../../services/api";
 import {
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 function StudentScanContent() {
+  const router = useRouter();
   const [tokenInput, setTokenInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +57,9 @@ function StudentScanContent() {
   };
 
   const handleContinue = () => {
-    setWorkflowSuccess(true);
+    if (validationResult?.session_id) {
+      router.push(`/attendance/location?session_id=${validationResult.session_id}`);
+    }
   };
 
   return (
