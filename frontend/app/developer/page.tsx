@@ -25,6 +25,12 @@ function DeveloperDashboardContent() {
   const [testSessions, setTestSessions] = useState<AttendanceSession[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const [validationToken, setValidationToken] = useState("");
+  const [validationResult, setValidationResult] = useState<any>(null);
+  const [validating, setValidating] = useState(false);
+  const [qrOperationLoading, setQrOperationLoading] = useState<Record<number, boolean>>({});
+  const [qrStatusText, setQrStatusText] = useState<Record<number, string>>({});
+
   const fetchTestSessions = async () => {
     try {
       const data = await apiService.listSessions({ size: 5 });
@@ -88,6 +94,51 @@ function DeveloperDashboardContent() {
       fetchTestSessions();
     } catch (err) {
       console.error("Failed to delete session", err);
+    }
+  };
+
+  const handleGenerateQr = async (id: number) => {
+    setQrOperationLoading((prev) => ({ ...prev, [id]: true }));
+    try {
+      const res = await apiService.generateQr(id);
+      setQrStatusText((prev) => ({ ...prev, [id]: `Token: ${res.token.substring(0, 10)}...` }));
+      if (typeof window !== "undefined") {
+        // Automatically pre-fill validation token input with newly generated QR token for testing convenience
+        setValidationToken(res.token);
+      }
+      fetchTestSessions();
+    } catch (err: any) {
+      setQrStatusText((prev) => ({ ...prev, [id]: `Error: ${err.message}` }));
+    } finally {
+      setQrOperationLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const handleExpireQr = async (id: number) => {
+    setQrOperationLoading((prev) => ({ ...prev, [id]: true }));
+    try {
+      await apiService.expireQr(id);
+      setQrStatusText((prev) => ({ ...prev, [id]: `Expired successfully!` }));
+      fetchTestSessions();
+    } catch (err: any) {
+      setQrStatusText((prev) => ({ ...prev, [id]: `Error: ${err.message}` }));
+    } finally {
+      setQrOperationLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const handleValidateToken = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validationToken) return;
+    setValidating(true);
+    setValidationResult(null);
+    try {
+      const res = await apiService.validateQr(validationToken);
+      setValidationResult(res);
+    } catch (err: any) {
+      setValidationResult({ error: err.message });
+    } finally {
+      setValidating(false);
     }
   };
 
@@ -164,7 +215,7 @@ function DeveloperDashboardContent() {
             </div>
 
             {testSessions.length === 0 ? (
-              <p className="text-slate-550 py-4 text-center text-xs">
+              <p className="py-4 text-center text-xs text-slate-500">
                 No test sessions generated yet.
               </p>
             ) : (
@@ -172,51 +223,74 @@ function DeveloperDashboardContent() {
                 {testSessions.map((session) => (
                   <div
                     key={session.id}
-                    className="hover:border-slate-850 flex flex-col justify-between gap-3 rounded-lg border border-slate-900 bg-slate-950/60 p-3 transition sm:flex-row sm:items-center"
+                    className="flex flex-col justify-between gap-3 rounded-lg border border-slate-900 bg-slate-950/60 p-3 transition hover:border-slate-800 sm:flex-row sm:items-center"
                   >
-                    <div>
+                    <div className="space-y-1">
                       <div className="text-xs font-bold text-white">
                         {session.title}{" "}
-                        <span className="text-slate-550 text-[9px] font-normal">#{session.id}</span>
+                        <span className="text-[9px] font-normal text-slate-500">#{session.id}</span>
                       </div>
-                      <div className="text-slate-550 mt-0.5 text-[10px]">
+                      <div className="text-[10px] text-slate-400">
                         Status:{" "}
                         <span className="font-semibold text-indigo-400">{session.status}</span>
                         {session.session_code && (
                           <>
                             {" "}
                             | Code:{" "}
-                            <span className="text-blue-450 font-mono font-bold">
+                            <span className="font-mono font-bold text-blue-400">
                               {session.session_code}
                             </span>
                           </>
                         )}
                       </div>
+                      {qrStatusText[session.id] && (
+                        <div className="font-mono text-[9px] text-emerald-400">
+                          {qrStatusText[session.id]}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 sm:flex-nowrap">
                       {session.status === "DRAFT" && (
                         <button
                           onClick={() => handleStart(session.id)}
-                          className="hover:text-emerald-350 flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-emerald-400"
+                          className="text-emerald-450 flex cursor-pointer items-center gap-0.5 text-[9px] font-bold hover:text-emerald-400"
                         >
                           <Play className="h-3 w-3" />
                           <span>Start</span>
                         </button>
                       )}
                       {(session.status === "ACTIVE" || session.status === "REOPENED") && (
-                        <button
-                          onClick={() => handleEnd(session.id)}
-                          className="hover:text-rose-350 flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-rose-400"
-                        >
-                          <Square className="h-3 w-3" />
-                          <span>End</span>
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleGenerateQr(session.id)}
+                            disabled={qrOperationLoading[session.id]}
+                            className="flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-indigo-400 hover:text-indigo-300 disabled:opacity-50"
+                          >
+                            <Terminal className="h-3 w-3" />
+                            <span>Gen QR</span>
+                          </button>
+                          <button
+                            onClick={() => handleExpireQr(session.id)}
+                            disabled={qrOperationLoading[session.id]}
+                            className="flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-amber-500 hover:text-amber-400 disabled:opacity-50"
+                          >
+                            <Square className="h-3 w-3" />
+                            <span>Force Expire</span>
+                          </button>
+                          <button
+                            onClick={() => handleEnd(session.id)}
+                            className="flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-rose-500 hover:text-rose-400"
+                          >
+                            <Square className="h-3 w-3" />
+                            <span>End</span>
+                          </button>
+                        </>
                       )}
                       {session.status === "ENDED" && (
                         <button
                           onClick={() => handleReopen(session.id)}
-                          className="hover:text-purple-350 flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-purple-400"
+                          className="flex cursor-pointer items-center gap-0.5 text-[9px] font-bold text-purple-400 hover:text-purple-300"
                         >
                           <RotateCcw className="h-3 w-3" />
                           <span>Reopen</span>
@@ -244,6 +318,92 @@ function DeveloperDashboardContent() {
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
+          </div>
+
+          {/* QR Validation Simulator Form */}
+          <div className="glass-panel space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+            <h3 className="flex items-center gap-2 border-b border-slate-900 pb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              QR Token Validation Simulator
+            </h3>
+
+            <form onSubmit={handleValidateToken} className="space-y-3">
+              <div>
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  QR Token
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={validationToken}
+                    onChange={(e) => setValidationToken(e.target.value)}
+                    placeholder="Enter or paste generated QR token..."
+                    className="flex-1 rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 font-mono text-xs text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={validating || !validationToken}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-indigo-500 disabled:opacity-50"
+                  >
+                    {validating ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <span>Validate</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {validationResult && (
+              <div className="rounded-lg border border-slate-900 bg-slate-950/80 p-3 font-mono text-xs">
+                <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  Validation Response
+                </div>
+                {validationResult.error ? (
+                  <div className="text-rose-400">Error: {validationResult.error}</div>
+                ) : (
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Valid:</span>
+                      <span
+                        className={
+                          validationResult.valid
+                            ? "font-bold text-emerald-400"
+                            : "font-bold text-rose-500"
+                        }
+                      >
+                        {validationResult.valid ? "TRUE" : "FALSE"}
+                      </span>
+                    </div>
+                    {validationResult.session_id && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Session ID:</span>
+                          <span>{validationResult.session_id}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Title:</span>
+                          <span>{validationResult.session_title}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Subject:</span>
+                          <span>{validationResult.subject}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Class Name:</span>
+                          <span>{validationResult.class_name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Teacher:</span>
+                          <span>{validationResult.teacher_name}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Diagnostics Panel */}

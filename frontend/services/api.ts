@@ -193,6 +193,42 @@ export const apiService = {
       method: "POST",
     });
   },
+
+  // QR Generation & Session Access APIs
+  async generateQr(sessionId: number): Promise<QRTokenResponse> {
+    return request<QRTokenResponse>(`/sessions/${sessionId}/generate-qr`, {
+      method: "POST",
+    });
+  },
+
+  async getCurrentQr(sessionId: number): Promise<QRTokenResponse> {
+    return request<QRTokenResponse>(`/sessions/${sessionId}/current-qr`);
+  },
+
+  async getQrHistory(sessionId: number): Promise<QRTokenResponse[]> {
+    return request<QRTokenResponse[]>(`/sessions/${sessionId}/qr-history`);
+  },
+
+  async expireQr(sessionId: number): Promise<{ status: string; message: string }> {
+    return request<{ status: string; message: string }>(`/sessions/${sessionId}/expire-qr`, {
+      method: "POST",
+    });
+  },
+
+  async validateQr(token: string): Promise<QRValidateResponse> {
+    return request<QRValidateResponse>("/qr/validate", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  async getQrStatus(
+    token: string,
+  ): Promise<{ token: string; is_active: boolean; expired: boolean; valid: boolean }> {
+    return request<{ token: string; is_active: boolean; expired: boolean; valid: boolean }>(
+      `/qr/status/${token}`,
+    );
+  },
 };
 
 export interface AttendanceSession {
@@ -215,4 +251,19 @@ export interface SessionStats {
   active: number;
   ended: number;
   draft: number;
+}
+
+export interface QRTokenResponse {
+  token: string;
+  expires_at: string;
+  is_active: boolean;
+}
+
+export interface QRValidateResponse {
+  valid: boolean;
+  session_id: number | null;
+  session_title: string | null;
+  subject: string | null;
+  class_name: string | null;
+  teacher_name: string | null;
 }
