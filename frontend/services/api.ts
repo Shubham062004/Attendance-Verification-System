@@ -289,6 +289,37 @@ export const apiService = {
   async getVerificationsBySession(sessionId: number): Promise<VerificationSessionResponse[]> {
     return request<VerificationSessionResponse[]>(`/verification/session/${sessionId}`);
   },
+
+  // Evidence / Selfie Storage APIs
+  async getUploadSignature(sessionId: number): Promise<UploadSignatureResponse> {
+    return request<UploadSignatureResponse>(`/evidence/upload-signature?session_id=${sessionId}`);
+  },
+
+  async storeEvidence(payload: {
+    session_id: number;
+    image_url: string;
+    image_public_id: string;
+    image_size?: number | null;
+    image_width?: number | null;
+    image_height?: number | null;
+  }): Promise<AttendanceEvidenceResponse> {
+    return request<AttendanceEvidenceResponse>("/evidence", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getEvidence(id: number): Promise<AttendanceEvidenceResponse> {
+    return request<AttendanceEvidenceResponse>(`/evidence/${id}`);
+  },
+
+  async getEvidenceBySession(sessionId: number): Promise<AttendanceEvidenceResponse[]> {
+    return request<AttendanceEvidenceResponse[]>(`/evidence/session/${sessionId}`);
+  },
+
+  async deleteEvidence(id: number): Promise<void> {
+    await request<void>(`/evidence/${id}`, { method: "DELETE" });
+  },
 };
 
 export interface AttendanceSession {
@@ -364,4 +395,26 @@ export interface VerificationSessionResponse {
   attempt_count: number;
   started_at: string;
   completed_at: string | null;
+}
+
+export interface UploadSignatureResponse {
+  signature: string;
+  api_key: string;
+  cloud_name: string;
+  timestamp: number;
+  folder: string;
+  public_id: string;
+  upload_url: string;
+}
+
+export interface AttendanceEvidenceResponse {
+  id: number;
+  student_id: number;
+  session_id: number;
+  image_url: string;
+  image_public_id: string;
+  image_size: number | null;
+  image_width: number | null;
+  image_height: number | null;
+  uploaded_at: string;
 }

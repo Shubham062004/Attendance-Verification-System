@@ -610,10 +610,10 @@ function CameraVerificationContent({ searchParams }: PageProps) {
                   </div>
                   <button
                     id="continue-to-attendance-btn"
-                    onClick={() => router.push("/attendance")}
+                    onClick={() => router.push(`/attendance/selfie?session_id=${sessionId}`)}
                     className="flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-xs font-bold text-white transition hover:bg-emerald-500"
                   >
-                    <span>Continue to Attendance</span>
+                    <span>Continue — Capture Selfie</span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </>
