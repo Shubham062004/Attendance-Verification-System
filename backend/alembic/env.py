@@ -21,6 +21,7 @@ from app.models.location import ClassroomLocation, LocationValidation # noqa
 from app.models.verification import VerificationSession # noqa
 from app.models.evidence import AttendanceEvidence # noqa
 from app.models.attendance import AttendanceRecord # noqa
+from app.models.risk import RiskAssessment, AttendanceFlag # noqa
 target_metadata = Base.metadata
 
 # Dynamic DB URL configuration

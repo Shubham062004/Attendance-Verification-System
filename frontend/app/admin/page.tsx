@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import { ProtectedRoute } from "../../components/ProtectedRoute";
 import {
@@ -72,6 +73,13 @@ function AdminDashboardContent() {
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Dashboard Overview</span>
               </button>
+              <Link
+                href="/admin/risk"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
+              >
+                <AlertCircle className="h-4 w-4 text-rose-400" />
+                <span>Risk Detection</span>
+              </Link>
               <button
                 className="flex w-full cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
                 disabled
