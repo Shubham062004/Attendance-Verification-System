@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -25,23 +27,40 @@ setup_logging()
 # Initialize external services
 configure_cloudinary()
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan — startup and shutdown logic."""
+    logger.info("Starting up Smart Attendance API v1.0.0 ...")
+    yield
+    logger.info("Shutting down Smart Attendance API ...")
+
+
 app = FastAPI(
     title="Smart Attendance Verification API",
-    description="Production-grade API for attendance verification system.",
-    version="0.1.0",
+    description=(
+        "Production-grade API for the Smart Attendance Verification System. "
+        "Handles authentication, session management, QR generation, multi-factor "
+        "attendance verification (location + blink + smile), risk assessment, "
+        "reporting, audit logging, and weather-aware success experiences."
+    ),
+    version="1.0.0",
+    lifespan=lifespan,
     docs_url="/docs" if not settings.is_production else None,
     redoc_url="/redoc" if not settings.is_production else None,
+    contact={
+        "name": "Smart Attendance System",
+        "url": "https://github.com/Shubham062004/Attendance-Verification-System",
+    },
+    license_info={
+        "name": "MIT",
+    },
 )
 
-# CORS Configuration
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
+# CORS — sourced from settings (configurable per environment)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,14 +81,3 @@ app.include_router(risk_router)
 app.include_router(admin_router)
 app.include_router(reports_router)
 app.include_router(audit_router)
-
-
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Starting up Smart Attendance API...")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("Shutting down Smart Attendance API...")
