@@ -412,7 +412,85 @@ export const apiService = {
       method: "DELETE",
     });
   },
+
+  // Reporting APIs
+  async getEodReport(date?: string): Promise<EODReportResponse> {
+    return request<EODReportResponse>(`/reports/eod${date ? `?date=${date}` : ""}`);
+  },
+
+  async getStudentReport(id: number): Promise<StudentReportResponse> {
+    return request<StudentReportResponse>(`/reports/student/${id}`);
+  },
+
+  async getSessionReport(id: number): Promise<SessionReportResponse> {
+    return request<SessionReportResponse>(`/reports/session/${id}`);
+  },
+
+  async getSummaryMetrics(): Promise<AttendanceSummaryResponse> {
+    return request<AttendanceSummaryResponse>("/reports/summary");
+  },
+
+  async downloadReport(format: "csv" | "excel" | "pdf", date?: string): Promise<Blob> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    const url = `${API_BASE_URL}/reports/export/${format}${date ? `?date=${date}` : ""}`;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      throw new Error(`Failed to export ${format} report`);
+    }
+    return response.blob();
+  },
 };
+
+export interface EODReportStudentItem {
+  s_no: number;
+  student_name: string;
+  registration_number: string;
+  slot_10_11: string;
+  slot_11_12: string;
+  slot_12_13: string;
+  slot_14_15: string;
+  slot_15_16: string;
+  attendance_percentage: string;
+}
+
+export interface EODReportResponse {
+  date: string;
+  records: EODReportStudentItem[];
+}
+
+export interface SessionReportResponse {
+  session_id: number;
+  session_title: string;
+  subject: string;
+  class_name: string;
+  present_count: number;
+  absent_count: number;
+  attendance_percentage: number;
+}
+
+export interface StudentReportResponse {
+  student_id: number;
+  student_name: string;
+  registration_number: string | null;
+  email: string;
+  present_count: number;
+  absent_count: number;
+  attendance_percentage: number;
+}
+
+export interface AttendanceSummaryResponse {
+  highest_attendance_pct: number;
+  highest_attendance_student: string | null;
+  lowest_attendance_pct: number;
+  lowest_attendance_student: string | null;
+  average_attendance_pct: number;
+  total_present: number;
+  total_absent: number;
+}
 
 export interface TodaySessionOverview {
   id: number;
