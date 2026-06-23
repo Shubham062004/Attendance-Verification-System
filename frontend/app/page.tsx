@@ -21,6 +21,8 @@ import {
   Star,
   Zap,
   Lock,
+  X,
+  Loader2,
 } from "lucide-react";
 
 // ── Security feature cards ─────────────────────────────────────────────────
@@ -158,8 +160,13 @@ const colorMap: Record<string, { bg: string; border: string; text: string; glow:
 };
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
   const featuresRef = useRef<HTMLElement>(null);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [regNumber, setRegNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const dashboardHref =
     user?.role === "Admin"
@@ -169,6 +176,79 @@ export default function HomePage() {
         : user
           ? "/schedule"
           : "/login";
+
+  const handleQuickFill = (reg: string, pass: string) => {
+    setRegNumber(reg);
+    setPassword(pass);
+    setError(null);
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const reg = regNumber.trim().toUpperCase();
+    const pass = password.trim();
+
+    if (!reg || !pass) {
+      setError("Registration Number and Password are required.");
+      setLoading(false);
+      return;
+    }
+
+    // Verify against dummy credentials
+    let email = "";
+    let name = "";
+
+    if (reg === "ADMIN001") {
+      if (pass !== "adminpassword") {
+        setError("Invalid password for Admin account.");
+        setLoading(false);
+        return;
+      }
+      email = "admin@example.com";
+      name = "Admin User";
+    } else if (reg === "STU001") {
+      if (pass !== "password123") {
+        setError("Invalid password for STU001.");
+        setLoading(false);
+        return;
+      }
+      email = "student1@example.com";
+      name = "Rahul Sharma";
+    } else if (reg === "STU002") {
+      if (pass !== "password123") {
+        setError("Invalid password for STU002.");
+        setLoading(false);
+        return;
+      }
+      email = "student2@example.com";
+      name = "Aisha Patel";
+    } else if (reg === "STU003") {
+      if (pass !== "password123") {
+        setError("Invalid password for STU003.");
+        setLoading(false);
+        return;
+      }
+      email = "student3@example.com";
+      name = "Vikram Singh";
+    } else {
+      setError("Invalid Registration Number. Use ADMIN001, STU001, STU002, or STU003.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const mockToken = `mock_google_${name.replace(/\s+/g, "")}_${email}`;
+      await loginWithGoogle(mockToken);
+      setIsLoginOpen(false);
+    } catch (err: any) {
+      setError(err?.message ?? "Authentication failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const scrollToFeatures = () => {
     featuresRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -227,12 +307,12 @@ export default function HomePage() {
               </Link>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="text-sm font-medium text-slate-400 transition hover:text-white"
+                <button
+                  onClick={() => setIsLoginOpen(true)}
+                  className="cursor-pointer border-none bg-transparent text-sm font-medium text-slate-400 transition hover:text-white focus:outline-none"
                 >
                   Sign In
-                </Link>
+                </button>
                 <Link
                   href="/schedule"
                   className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-500"
@@ -510,6 +590,137 @@ export default function HomePage() {
           </p>
         </div>
       </footer>
+
+      {/* ── Login Modal ── */}
+      {isLoginOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setIsLoginOpen(false);
+                setError(null);
+                setRegNumber("");
+                setPassword("");
+              }}
+              className="absolute right-4 top-4 cursor-pointer text-slate-400 transition hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Header */}
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-600/10 text-blue-400">
+                <Shield className="h-5 w-5" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Sign In to Dashboard</h2>
+              <p className="mt-1 text-xs text-slate-400">Smart Attendance Verification System</p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 flex items-center gap-2.5 rounded-lg border border-red-500/20 bg-red-600/10 p-3 text-xs text-red-400">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+                  Registration Number / Email
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. STU001, ADMIN001"
+                  value={regNumber}
+                  onChange={(e) => setRegNumber(e.target.value)}
+                  className="placeholder-slate-650 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 text-xs text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-slate-300">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="placeholder-slate-650 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 text-xs text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={loading}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex w-full cursor-pointer items-center justify-center rounded-lg bg-blue-600 py-2.5 text-xs font-bold text-white transition hover:bg-blue-500 disabled:opacity-50"
+              >
+                {loading ? (
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <LogIn className="mr-1.5 h-4 w-4" />
+                )}
+                <span>Sign In</span>
+              </button>
+            </form>
+
+            {/* Quick Testing Credentials */}
+            <div className="mt-6 border-t border-slate-800 pt-4">
+              <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Quick Testing Credentials (Click to auto-fill)
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill("ADMIN001", "adminpassword")}
+                  className="flex cursor-pointer flex-col items-start rounded-lg border border-slate-800 bg-slate-950/40 p-2 text-left transition hover:border-blue-500/50 hover:bg-slate-950"
+                >
+                  <span className="text-[10px] font-bold text-blue-400">Admin</span>
+                  <span className="text-[9px] text-slate-500">Reg: ADMIN001</span>
+                  <span className="text-[9px] text-slate-500">Pass: adminpassword</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill("STU001", "password123")}
+                  className="flex cursor-pointer flex-col items-start rounded-lg border border-slate-800 bg-slate-950/40 p-2 text-left transition hover:border-blue-500/50 hover:bg-slate-950"
+                >
+                  <span className="text-[10px] font-bold text-emerald-400">Student 1</span>
+                  <span className="text-[9px] text-slate-500">Reg: STU001</span>
+                  <span className="text-[9px] text-slate-500">Pass: password123</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill("STU002", "password123")}
+                  className="flex cursor-pointer flex-col items-start rounded-lg border border-slate-800 bg-slate-950/40 p-2 text-left transition hover:border-blue-500/50 hover:bg-slate-950"
+                >
+                  <span className="text-[10px] font-bold text-emerald-400">Student 2</span>
+                  <span className="text-[9px] text-slate-500">Reg: STU002</span>
+                  <span className="text-[9px] text-slate-500">Pass: password123</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill("STU003", "password123")}
+                  className="flex cursor-pointer flex-col items-start rounded-lg border border-slate-800 bg-slate-950/40 p-2 text-left transition hover:border-blue-500/50 hover:bg-slate-950"
+                >
+                  <span className="text-[10px] font-bold text-emerald-400">Student 3</span>
+                  <span className="text-[9px] text-slate-500">Reg: STU003</span>
+                  <span className="text-[9px] text-slate-500">Pass: password123</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
