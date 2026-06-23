@@ -177,6 +177,10 @@ function ReportsDashboardContent() {
                 <BarChart3 className="h-4 w-4" />
                 <span>Reports & Exports</span>
               </Link>
+              <Link href="/admin/audit" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200">
+                <Shield className="h-4 w-4 text-indigo-400" />
+                <span>Audit Logs</span>
+              </Link>
             </div>
 
             {/* Quick Summary Cards (Sidebar Links) */}

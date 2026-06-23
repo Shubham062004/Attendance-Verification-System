@@ -5,6 +5,7 @@ from app.api.attendance import router as attendance_router
 from app.api.risk import router as risk_router
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
+from app.api.audit import router as audit_router
 from app.api.evidence import router as evidence_router
 from app.api.health import router as health_router
 from app.api.location import router as location_router
@@ -16,6 +17,7 @@ from app.api.verification import router as verification_router
 from app.core.cloudinary import configure_cloudinary
 from app.core.config import settings
 from app.core.logging import logger, setup_logging
+from app.middleware.audit import AuditMiddleware
 
 # Setup logger configuration
 setup_logging()
@@ -44,6 +46,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(AuditMiddleware)
 
 # Register routers
 app.include_router(health_router)
@@ -58,6 +61,8 @@ app.include_router(attendance_router)
 app.include_router(risk_router)
 app.include_router(admin_router)
 app.include_router(reports_router)
+app.include_router(audit_router)
+
 
 
 @app.on_event("startup")

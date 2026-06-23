@@ -12,7 +12,15 @@ from app.schemas.attendance import AttendanceSubmitResponse, SessionAttendanceSu
 
 
 def log_audit(db: Session, user_id: int, action: str, details: str | None = None) -> None:
-    audit = AuditLog(user_id=user_id, action=action, details=details)
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    audit = AuditLog(
+        actor_id=user_id,
+        actor_name=user.name if user else None,
+        actor_role=user.role if user else None,
+        action_type=action,
+        description=details or "",
+    )
     db.add(audit)
     db.commit()
 
@@ -164,16 +172,7 @@ class AttendanceService:
         db.refresh(record)  # Refresh to get updated status if it got flagged
 
         # ── 8. Audit log ──────────────────────────────────────────────────────
-        log_audit(
-            db,
-            user_id=student_id,
-            action="Attendance Submitted",
-            details=(
-                f"Attendance submitted for session {session_id}. "
-                f"Record ID: {record.id}. Status: {record.status}. "
-                f"Risk Score: {assessment.risk_score} ({assessment.risk_level})."
-            ),
-        )
+
 
         return AttendanceSubmitResponse(
             attendance_marked=True,

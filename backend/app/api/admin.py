@@ -57,7 +57,14 @@ def get_all_attendance_records(db: Session = Depends(get_db)):
 
 
 def log_audit(db: Session, user_id: int, action: str, details: str | None = None) -> None:
-    audit = AuditLog(user_id=user_id, action=action, details=details)
+    user = db.query(User).filter(User.id == user_id).first()
+    audit = AuditLog(
+        actor_id=user_id,
+        actor_name=user.name if user else None,
+        actor_role=user.role if user else None,
+        action_type=action,
+        description=details or "",
+    )
     db.add(audit)
     db.commit()
 
@@ -284,12 +291,7 @@ def add_attendance_manually(
     db.add(assessment)
     db.commit()
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Attendance Added",
-        details=f"Manually marked student {payload.student_id} as {payload.status} for session {payload.session_id}."
-    )
+
 
     return {"message": "Attendance record created successfully", "record_id": record.id}
 
@@ -331,34 +333,7 @@ def override_attendance_record(
             severity=FlagSeverity.LOW.value
         )
         db.add(flag)
-        log_audit(
-            db,
-            user_id=int(current_user.id),
-            action="Technical Issue Added",
-            details=f"Flagged attendance record #{id} with technical issue."
-        )
 
-    db.commit()
-
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Attendance Updated",
-        details=f"Updated record #{id} status from {old_status} to {payload.status}."
-    )
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Risk Overridden",
-        details=f"Overrode risk assessment flags for record #{id}."
-    )
-    if payload.notes:
-        log_audit(
-            db,
-            user_id=int(current_user.id),
-            action="Note Added",
-            details=f"Added admin review notes: '{payload.notes}'"
-        )
 
     return {"message": "Attendance record status successfully overridden"}
 
@@ -383,11 +358,6 @@ def remove_attendance_record(
     db.delete(record)
     db.commit()
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Attendance Removed",
-        details=f"Removed attendance record ID #{id} for student ID {record.student_id}."
-    )
+
 
     return {"message": "Attendance record successfully removed"}
