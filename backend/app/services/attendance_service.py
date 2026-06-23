@@ -138,19 +138,7 @@ class AttendanceService:
                 detail="Selfie evidence is required before submitting attendance.",
             )
 
-        # ── 6. Determine status (PRESENT vs FLAGGED) ─────────────────────────
-        # Flag if location is outside radius OR GPS accuracy is poor
-        attendance_status = AttendanceStatus.PRESENT.value
-        flag_reasons: list[str] = []
-
-        if not location_record.is_within_radius:
-            attendance_status = AttendanceStatus.FLAGGED.value
-            flag_reasons.append("Outside classroom radius")
-        if location_record.risk_score > 0:
-            attendance_status = AttendanceStatus.FLAGGED.value
-            flag_reasons.append(f"Location risk score: {location_record.risk_score}")
-
-        # ── 7. Create attendance record ───────────────────────────────────────
+        # ── 6. Create attendance record ───────────────────────────────────────
         try:
             record = AttendanceRecord(
                 student_id=student_id,
@@ -158,7 +146,7 @@ class AttendanceService:
                 location_validation_id=location_record.id,
                 verification_session_id=verification_record.id,
                 evidence_id=evidence_record.id,
-                status=attendance_status,
+                status=AttendanceStatus.PRESENT.value,
             )
             db.add(record)
             db.commit()
@@ -170,21 +158,26 @@ class AttendanceService:
                 detail="Attendance already marked for this session.",
             ) from None
 
+        # ── 7. Run Risk Engine ────────────────────────────────────────────────
+        from app.services.risk_service import RiskService
+        assessment = RiskService.evaluate_attendance(db, record.id)
+        db.refresh(record)  # Refresh to get updated status if it got flagged
+
         # ── 8. Audit log ──────────────────────────────────────────────────────
         log_audit(
             db,
             user_id=student_id,
             action="Attendance Submitted",
             details=(
-                f"Attendance {attendance_status} for session {session_id}. "
-                f"Record ID: {record.id}. "
-                + (f"Flags: {', '.join(flag_reasons)}" if flag_reasons else "No flags.")
+                f"Attendance submitted for session {session_id}. "
+                f"Record ID: {record.id}. Status: {record.status}. "
+                f"Risk Score: {assessment.risk_score} ({assessment.risk_level})."
             ),
         )
 
         return AttendanceSubmitResponse(
             attendance_marked=True,
-            status=attendance_status,
+            status=record.status,
             record_id=record.id,
             session_id=session_id,
             session_title=session.title,

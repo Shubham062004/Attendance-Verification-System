@@ -340,7 +340,77 @@ export const apiService = {
   async getStudentAttendance(studentId: number): Promise<AttendanceRecordResponse[]> {
     return request<AttendanceRecordResponse[]>(`/attendance/student/${studentId}`);
   },
+
+  // Risk & Review APIs
+  async evaluateRisk(attendanceRecordId: number): Promise<RiskAssessmentWithFlags> {
+    return request<RiskAssessmentWithFlags>("/risk/evaluate", {
+      method: "POST",
+      body: JSON.stringify({ attendance_record_id: attendanceRecordId }),
+    });
+  },
+
+  async getRiskOverview(): Promise<RiskOverviewStats> {
+    return request<RiskOverviewStats>("/risk/overview");
+  },
+
+  async getAllFlags(): Promise<AttendanceFlag[]> {
+    return request<AttendanceFlag[]>("/risk/flags");
+  },
+
+  async getHighRiskAssessments(): Promise<RiskAssessmentWithFlags[]> {
+    return request<RiskAssessmentWithFlags[]>("/risk/high-risk");
+  },
+
+  async getPendingReviews(): Promise<RiskAssessmentWithFlags[]> {
+    return request<RiskAssessmentWithFlags[]>("/risk/review");
+  },
+
+  async getRiskByAttendanceId(attendanceId: number): Promise<RiskAssessmentWithFlags> {
+    return request<RiskAssessmentWithFlags>(`/risk/${attendanceId}`);
+  },
+
+  async reviewRiskAssessment(id: number, status: "PRESENT" | "REJECTED", notes?: string): Promise<RiskAssessmentWithFlags> {
+    return request<RiskAssessmentWithFlags>(`/risk/${id}/review`, {
+      method: "PATCH",
+      body: JSON.stringify({ status, notes }),
+    });
+  },
 };
+
+export interface AttendanceFlag {
+  id: number;
+  attendance_record_id: number;
+  flag_type: string;
+  flag_reason: string;
+  severity: "LOW" | "MEDIUM" | "HIGH";
+  created_at: string;
+}
+
+export interface RiskAssessment {
+  id: number;
+  attendance_record_id: number;
+  risk_score: number;
+  risk_level: "SAFE" | "REVIEW" | "HIGH_RISK";
+  reviewed: boolean;
+  reviewed_by: number | null;
+  reviewed_at: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface RiskAssessmentWithFlags extends RiskAssessment {
+  flags: AttendanceFlag[];
+  student_name: string | null;
+  student_reg_number: string | null;
+  session_title: string | null;
+}
+
+export interface RiskOverviewStats {
+  total_safe: number;
+  total_review: number;
+  total_high_risk: number;
+  pending_reviews: number;
+}
 
 export interface AttendanceSession {
   id: number;
