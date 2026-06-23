@@ -17,7 +17,14 @@ router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 
 def log_audit(db: Session, user_id: int, action: str, details: str | None = None) -> None:
-    audit = AuditLog(user_id=user_id, action=action, details=details)
+    user = db.query(User).filter(User.id == user_id).first()
+    audit = AuditLog(
+        actor_id=user_id,
+        actor_name=user.name if user else None,
+        actor_role=user.role if user else None,
+        action_type=action,
+        description=details or "",
+    )
     db.add(audit)
     db.commit()
 
@@ -64,12 +71,7 @@ def create_session(
     db.commit()
     db.refresh(session)
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Session Created",
-        details=f"Created session ID {session.id}: {session.title}",
-    )
+
 
     return session
 
@@ -202,12 +204,7 @@ def update_session(
     db.commit()
     db.refresh(session)
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Session Updated",
-        details=f"Updated session ID {session.id}",
-    )
+
 
     return session
 
@@ -228,12 +225,7 @@ def delete_session(
     db.delete(session)
     db.commit()
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Session Deleted",
-        details=f"Deleted session ID {id}",
-    )
+
 
     return {"status": "success", "message": f"Successfully deleted session {id}"}
 
@@ -264,12 +256,7 @@ def start_session(
     db.commit()
     db.refresh(session)
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Session Started",
-        details=f"Started session ID {session.id} with code {session.session_code}",
-    )
+
 
     return session
 
@@ -299,12 +286,7 @@ def end_session(
     db.commit()
     db.refresh(session)
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Session Ended",
-        details=f"Ended session ID {session.id}",
-    )
+
 
     return session
 
@@ -332,11 +314,6 @@ def reopen_session(
     db.commit()
     db.refresh(session)
 
-    log_audit(
-        db,
-        user_id=int(current_user.id),
-        action="Session Reopened",
-        details=f"Reopened session ID {session.id}",
-    )
+
 
     return session

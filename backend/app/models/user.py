@@ -1,7 +1,8 @@
 from datetime import datetime
+
 from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column
 from sqlalchemy.sql import func
-from sqlalchemy.orm import declared_attr, Mapped, mapped_column
 
 from app.db.base_class import Base
 

@@ -8,11 +8,23 @@ from app.models.evidence import AttendanceEvidence
 from app.models.location import LocationValidation
 from app.models.session import AttendanceSession
 from app.models.verification import VerificationSession
-from app.schemas.attendance import AttendanceSubmitResponse, SessionAttendanceSummary
+from app.schemas.attendance import (
+    AttendanceRecordResponse,
+    AttendanceSubmitResponse,
+    SessionAttendanceSummary,
+)
 
 
 def log_audit(db: Session, user_id: int, action: str, details: str | None = None) -> None:
-    audit = AuditLog(user_id=user_id, action=action, details=details)
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    audit = AuditLog(
+        actor_id=user_id,
+        actor_name=user.name if user else None,
+        actor_role=user.role if user else None,
+        action_type=action,
+        description=details or "",
+    )
     db.add(audit)
     db.commit()
 
@@ -160,20 +172,11 @@ class AttendanceService:
 
         # ── 7. Run Risk Engine ────────────────────────────────────────────────
         from app.services.risk_service import RiskService
-        assessment = RiskService.evaluate_attendance(db, record.id)
+        RiskService.evaluate_attendance(db, record.id)
         db.refresh(record)  # Refresh to get updated status if it got flagged
 
         # ── 8. Audit log ──────────────────────────────────────────────────────
-        log_audit(
-            db,
-            user_id=student_id,
-            action="Attendance Submitted",
-            details=(
-                f"Attendance submitted for session {session_id}. "
-                f"Record ID: {record.id}. Status: {record.status}. "
-                f"Risk Score: {assessment.risk_score} ({assessment.risk_level})."
-            ),
-        )
+
 
         return AttendanceSubmitResponse(
             attendance_marked=True,
@@ -204,7 +207,7 @@ class AttendanceService:
             present=sum(1 for r in records if r.status == AttendanceStatus.PRESENT.value),
             flagged=sum(1 for r in records if r.status == AttendanceStatus.FLAGGED.value),
             rejected=sum(1 for r in records if r.status == AttendanceStatus.REJECTED.value),
-            records=records,
+            records=[AttendanceRecordResponse.model_validate(r) for r in records],
         )
 
     @staticmethod

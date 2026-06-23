@@ -1,11 +1,13 @@
 import csv
 import io
-from datetime import UTC, datetime, time
+from datetime import UTC, date, datetime, time
+from typing import Any
 
 # openpyxl imports for Excel generation
 import openpyxl
 from fastapi import HTTPException
 from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.utils import get_column_letter
 from reportlab.lib import colors
 
 # reportlab imports for PDF generation
@@ -31,7 +33,15 @@ from app.schemas.reports import (
 
 
 def log_audit(db: Session, user_id: int, action: str, details: str | None = None) -> None:
-    audit = AuditLog(user_id=user_id, action=action, details=details)
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    audit = AuditLog(
+        actor_id=user_id,
+        actor_name=user.name if user else None,
+        actor_role=user.role if user else None,
+        action_type=action,
+        description=details or "",
+    )
     db.add(audit)
     db.commit()
 
@@ -43,7 +53,7 @@ class NumberedCanvas(canvas.Canvas):
 
     def showPage(self):  # noqa: N802
         self._saved_page_states.append(dict(self.__dict__))
-        self._startPage()
+        self._startPage()  # type: ignore
 
     def save(self):
         num_pages = len(self._saved_page_states)
@@ -68,13 +78,13 @@ class NumberedCanvas(canvas.Canvas):
         # Draw footer
         self.setFont("Helvetica", 8)
         self.drawString(inch, 0.4 * inch, f"Generated on {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')} UTC")
-        self.drawRightString(7.5 * inch, 0.4 * inch, f"Page {self._pageNumber} of {page_count}")
+        self.drawRightString(7.5 * inch, 0.4 * inch, f"Page {self._pageNumber} of {page_count}")  # type: ignore
         self.restoreState()
 
 
 class ReportingService:
     @staticmethod
-    def get_eod_data(db: Session, target_date: datetime.date) -> EODReportResponse:
+    def get_eod_data(db: Session, target_date: date) -> EODReportResponse:
         """
         Aggregate session-wise attendance per student for standard daily slots:
         10-11, 11-12, 12-13, 14-15, 15-16.
@@ -93,7 +103,7 @@ class ReportingService:
             sessions = db.query(AttendanceSession).order_by(desc(AttendanceSession.created_at)).limit(5).all()
 
         # Map sessions to time slots based on start_time hour (defaulting to session.created_at hour)
-        slots_map = {
+        slots_map: dict[str, AttendanceSession | None] = {
             "10-11": None,
             "11-12": None,
             "12-13": None,
@@ -158,7 +168,7 @@ class ReportingService:
         return EODReportResponse(date=target_date.strftime("%Y-%m-%d"), records=records)
 
     @staticmethod
-    def generate_csv(db: Session, target_date: datetime.date, admin_id: int) -> str:
+    def generate_csv(db: Session, target_date: date, admin_id: int) -> str:
         data = ReportingService.get_eod_data(db, target_date)
         
         output = io.StringIO()
@@ -201,11 +211,12 @@ class ReportingService:
         return output.getvalue()
 
     @staticmethod
-    def generate_excel(db: Session, target_date: datetime.date, admin_id: int) -> bytes:
+    def generate_excel(db: Session, target_date: date, admin_id: int) -> bytes:
         data = ReportingService.get_eod_data(db, target_date)
         
         wb = openpyxl.Workbook()
         ws = wb.active
+        assert ws is not None
         ws.title = f"Attendance_{target_date}"
         
         # Headers
@@ -250,9 +261,11 @@ class ReportingService:
         # Style data cells & auto-adjust column width
         for col in ws.columns:
             max_len = 0
-            col_letter = openpyxl.utils.get_column_letter(col[0].column)
+            col_index = col[0].column
+            assert col_index is not None
+            col_letter = get_column_letter(col_index)
             for cell in col:
-                if cell.row > 1:
+                if cell.row and cell.row > 1:
                     cell.font = Font(name="Calibri", size=10)
                     if cell.column in (1, 3, 4, 5, 6, 7, 8, 9):
                         cell.alignment = center_align
@@ -275,7 +288,7 @@ class ReportingService:
         return stream.getvalue()
 
     @staticmethod
-    def generate_pdf(db: Session, target_date: datetime.date, admin_id: int) -> bytes:
+    def generate_pdf(db: Session, target_date: date, admin_id: int) -> bytes:
         data = ReportingService.get_eod_data(db, target_date)
         
         stream = io.BytesIO()
@@ -315,7 +328,7 @@ class ReportingService:
             alignment=1
         ))
 
-        story = []
+        story: list[Any] = []
         
         # Organization header spacing
         story.append(Spacer(1, 10))

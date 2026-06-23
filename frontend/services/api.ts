@@ -369,7 +369,11 @@ export const apiService = {
     return request<RiskAssessmentWithFlags>(`/risk/${attendanceId}`);
   },
 
-  async reviewRiskAssessment(id: number, status: "PRESENT" | "REJECTED", notes?: string): Promise<RiskAssessmentWithFlags> {
+  async reviewRiskAssessment(
+    id: number,
+    status: "PRESENT" | "REJECTED",
+    notes?: string,
+  ): Promise<RiskAssessmentWithFlags> {
     return request<RiskAssessmentWithFlags>(`/risk/${id}/review`, {
       method: "PATCH",
       body: JSON.stringify({ status, notes }),
@@ -393,14 +397,24 @@ export const apiService = {
     return request<StudentDetailResponse>(`/admin/students/${id}`);
   },
 
-  async addAttendanceManually(studentId: number, sessionId: number, status: string, notes?: string): Promise<any> {
+  async addAttendanceManually(
+    studentId: number,
+    sessionId: number,
+    status: string,
+    notes?: string,
+  ): Promise<any> {
     return request<any>("/admin/attendance/add", {
       method: "POST",
       body: JSON.stringify({ student_id: studentId, session_id: sessionId, status, notes }),
     });
   },
 
-  async overrideAttendanceRecord(id: number, status: string, notes?: string, isTechnicalIssue?: boolean): Promise<any> {
+  async overrideAttendanceRecord(
+    id: number,
+    status: string,
+    notes?: string,
+    isTechnicalIssue?: boolean,
+  ): Promise<any> {
     return request<any>(`/admin/attendance/${id}/override`, {
       method: "POST",
       body: JSON.stringify({ status, notes, is_technical_issue: isTechnicalIssue }),
@@ -443,7 +457,103 @@ export const apiService = {
     }
     return response.blob();
   },
+
+  async getAuditLogs(params?: {
+    action_type?: string;
+    actor_role?: string;
+    entity_type?: string;
+    actor_id?: number;
+    start_date?: string;
+    end_date?: string;
+    search?: string;
+    page?: number;
+    size?: number;
+  }): Promise<AuditLogPaginatedResponse> {
+    const query = new URLSearchParams();
+    if (params?.action_type) query.append("action_type", params.action_type);
+    if (params?.actor_role) query.append("actor_role", params.actor_role);
+    if (params?.entity_type) query.append("entity_type", params.entity_type);
+    if (params?.actor_id) query.append("actor_id", params.actor_id.toString());
+    if (params?.start_date) query.append("start_date", params.start_date);
+    if (params?.end_date) query.append("end_date", params.end_date);
+    if (params?.search) query.append("search", params.search);
+    if (params?.page) query.append("page", params.page.toString());
+    if (params?.size) query.append("size", params.size.toString());
+    const queryString = query.toString();
+    return request<AuditLogPaginatedResponse>(`/audit${queryString ? "?" + queryString : ""}`);
+  },
+
+  async getAuditLog(id: number): Promise<AuditLog> {
+    return request<AuditLog>(`/audit/${id}`);
+  },
+
+  async getAuditLogsByUser(id: number): Promise<AuditLog[]> {
+    return request<AuditLog[]>(`/audit/user/${id}`);
+  },
+
+  async getAuditLogsByEntity(entityId: number, entityType?: string): Promise<AuditLog[]> {
+    return request<AuditLog[]>(
+      `/audit/entity/${entityId}${entityType ? `?entity_type=${entityType}` : ""}`,
+    );
+  },
+
+  async downloadAuditReport(
+    format: "csv" | "excel" | "pdf",
+    params?: {
+      action_type?: string;
+      actor_role?: string;
+      entity_type?: string;
+      actor_id?: number;
+      start_date?: string;
+      end_date?: string;
+      search?: string;
+    },
+  ): Promise<Blob> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    const query = new URLSearchParams();
+    query.append("format", format);
+    if (params?.action_type) query.append("action_type", params.action_type);
+    if (params?.actor_role) query.append("actor_role", params.actor_role);
+    if (params?.entity_type) query.append("entity_type", params.entity_type);
+    if (params?.actor_id) query.append("actor_id", params.actor_id.toString());
+    if (params?.start_date) query.append("start_date", params.start_date);
+    if (params?.end_date) query.append("end_date", params.end_date);
+    if (params?.search) query.append("search", params.search);
+
+    const url = `${API_BASE_URL}/audit/export?${query.toString()}`;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      throw new Error(`Failed to export audit logs in ${format} format`);
+    }
+    return response.blob();
+  },
 };
+
+export interface AuditLog {
+  id: number;
+  actor_id: number | null;
+  actor_name: string | null;
+  actor_role: string | null;
+  action_type: string;
+  entity_type: string | null;
+  entity_id: number | null;
+  description: string;
+  metadata_json: Record<string, any> | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+export interface AuditLogPaginatedResponse {
+  items: AuditLog[];
+  total: number;
+  page: number;
+  size: number;
+}
 
 export interface EODReportStudentItem {
   s_no: number;

@@ -44,7 +44,8 @@ function AdminStudentHistoryContent() {
     const matchesSearch =
       !searchTerm ||
       (s.name && s.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (s.registration_number && s.registration_number.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (s.registration_number &&
+        s.registration_number.toLowerCase().includes(searchTerm.toLowerCase())) ||
       s.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     let matchesPercentage = true;
@@ -64,27 +65,32 @@ function AdminStudentHistoryContent() {
 
       <div className="mx-auto max-w-5xl space-y-6">
         {/* Breadcrumb */}
-        <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition hover:text-white">
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition hover:text-white"
+        >
           ← Back to Console Home
         </Link>
 
         {/* Title */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-900 pb-6">
+        <div className="flex flex-col gap-4 border-b border-slate-900 pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-xl border border-indigo-500/20 bg-indigo-600/10 p-2.5">
               <Calendar className="h-5 w-5 text-indigo-400" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Student History Portal</h1>
-              <p className="text-xs text-slate-500">Search and audit students' cumulative attendance percentages</p>
+              <p className="text-xs text-slate-500">
+                Search and audit students' cumulative attendance percentages
+              </p>
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <section className="glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-950/40 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <section className="glass-panel grid grid-cols-1 gap-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-5 sm:grid-cols-2">
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <Search className="h-4 w-4 text-slate-500" />
             </span>
             <input
@@ -92,18 +98,18 @@ function AdminStudentHistoryContent() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by Name, Email, or Reg No..."
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-800 bg-slate-900 text-slate-100 focus:outline-none"
+              className="w-full rounded-lg border border-slate-800 bg-slate-900 py-2 pl-9 pr-4 text-xs text-slate-100 focus:outline-none"
             />
           </div>
 
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <TrendingDown className="h-4 w-4 text-slate-500" />
             </span>
             <select
               value={minPercentage}
               onChange={(e) => setMinPercentage(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-800 bg-slate-900 text-slate-100 focus:outline-none"
+              className="w-full rounded-lg border border-slate-800 bg-slate-900 py-2 pl-9 pr-4 text-xs text-slate-100 focus:outline-none"
             >
               <option value="ALL">All Attendance Rates</option>
               <option value="LOW">Defaulters / Low Attendance ( &lt; 75% )</option>
@@ -113,23 +119,25 @@ function AdminStudentHistoryContent() {
         </section>
 
         {/* Student History Table */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-950/60 overflow-hidden">
+        <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <div className="flex flex-col items-center justify-center gap-3 py-20">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
               <p className="text-xs text-slate-500">Loading student database...</p>
             </div>
           ) : filteredStudents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+            <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
               <AlertCircle className="h-10 w-10 text-slate-700" />
-              <p className="text-sm text-slate-400 font-bold">No Students Registered</p>
-              <p className="text-xs text-slate-650 max-w-sm">No profiles found in the registry matching the search criteria.</p>
+              <p className="text-sm font-bold text-slate-400">No Students Registered</p>
+              <p className="text-slate-650 max-w-sm text-xs">
+                No profiles found in the registry matching the search criteria.
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-900 bg-slate-900/30 text-slate-400 font-semibold uppercase tracking-wider">
+                  <tr className="border-b border-slate-900 bg-slate-900/30 font-semibold uppercase tracking-wider text-slate-400">
                     <th className="px-6 py-3.5">Name</th>
                     <th className="px-6 py-3.5">Registration Number</th>
                     <th className="px-6 py-3.5 text-center">Attendance %</th>
@@ -141,21 +149,31 @@ function AdminStudentHistoryContent() {
                 </thead>
                 <tbody className="divide-y divide-slate-900/60">
                   {filteredStudents.map((student) => (
-                    <tr key={student.id} className="hover:bg-slate-900/30 transition">
+                    <tr key={student.id} className="transition hover:bg-slate-900/30">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-bold text-white">{student.name || "Unknown Profile"}</p>
+                          <p className="font-bold text-white">
+                            {student.name || "Unknown Profile"}
+                          </p>
                           <p className="text-[10px] text-slate-500">{student.email}</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-400 font-semibold">{student.registration_number || "N/A"}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-400">
+                        {student.registration_number || "N/A"}
+                      </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`text-sm font-extrabold ${student.attendance_percentage < 75 ? "text-rose-400" : "text-emerald-400"}`}>
+                        <span
+                          className={`text-sm font-extrabold ${student.attendance_percentage < 75 ? "text-rose-400" : "text-emerald-400"}`}
+                        >
                           {Math.round(student.attendance_percentage)}%
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-center text-emerald-400 font-bold">{student.present_count}</td>
-                      <td className="px-6 py-4 text-center text-rose-400 font-bold">{student.absent_count}</td>
+                      <td className="px-6 py-4 text-center font-bold text-emerald-400">
+                        {student.present_count}
+                      </td>
+                      <td className="px-6 py-4 text-center font-bold text-rose-400">
+                        {student.absent_count}
+                      </td>
                       <td className="px-6 py-4 text-slate-500">
                         {student.last_attendance ? (
                           <div className="flex items-center gap-1">
@@ -169,7 +187,7 @@ function AdminStudentHistoryContent() {
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={`/admin/students/${student.id}`}
-                          className="inline-flex items-center gap-0.5 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-semibold"
+                          className="inline-flex items-center gap-0.5 rounded border border-slate-800 bg-slate-900 px-2.5 py-1 font-semibold text-slate-300 hover:bg-slate-800"
                         >
                           <span>Profile</span>
                           <ArrowRight className="h-3 w-3" />

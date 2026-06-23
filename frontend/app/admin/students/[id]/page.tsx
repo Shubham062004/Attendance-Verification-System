@@ -66,21 +66,31 @@ function AdminStudentDetailContent({ params }: PageProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "PRESENT": return "text-emerald-400 bg-emerald-950/30 border-emerald-800/40";
-      case "FLAGGED": return "text-amber-400 bg-amber-950/30 border-amber-800/40";
-      case "REJECTED": return "text-rose-400 bg-rose-950/30 border-rose-800/40";
-      case "ABSENT": return "text-slate-500 bg-slate-900 border-slate-805";
-      default: return "text-slate-400 bg-slate-900 border-slate-800";
+      case "PRESENT":
+        return "text-emerald-400 bg-emerald-950/30 border-emerald-800/40";
+      case "FLAGGED":
+        return "text-amber-400 bg-amber-950/30 border-amber-800/40";
+      case "REJECTED":
+        return "text-rose-400 bg-rose-950/30 border-rose-800/40";
+      case "ABSENT":
+        return "text-slate-500 bg-slate-900 border-slate-805";
+      default:
+        return "text-slate-400 bg-slate-900 border-slate-800";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "PRESENT": return <CheckCircle className="h-4 w-4 text-emerald-400" />;
-      case "FLAGGED": return <AlertTriangle className="h-4 w-4 text-amber-400" />;
-      case "REJECTED": return <XCircle className="h-4 w-4 text-rose-400" />;
-      case "ABSENT": return <XCircle className="h-4 w-4 text-slate-600" />;
-      default: return null;
+      case "PRESENT":
+        return <CheckCircle className="h-4 w-4 text-emerald-400" />;
+      case "FLAGGED":
+        return <AlertTriangle className="h-4 w-4 text-amber-400" />;
+      case "REJECTED":
+        return <XCircle className="h-4 w-4 text-rose-400" />;
+      case "ABSENT":
+        return <XCircle className="h-4 w-4 text-slate-600" />;
+      default:
+        return null;
     }
   };
 
@@ -91,20 +101,25 @@ function AdminStudentDetailContent({ params }: PageProps) {
 
       <div className="mx-auto max-w-4xl space-y-6">
         {/* Breadcrumb */}
-        <Link href="/admin/history" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition hover:text-white">
+        <Link
+          href="/admin/history"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition hover:text-white"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to History Portal
         </Link>
 
         {/* Title */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-900 pb-6">
+        <div className="flex flex-col gap-4 border-b border-slate-900 pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-xl border border-indigo-500/20 bg-indigo-600/10 p-2.5">
               <User className="h-6 w-6 text-indigo-400" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">{student.name || "Student Profile"}</h1>
-              <p className="text-xs text-slate-500">{student.email} · Reg No: {student.registration_number || "N/A"}</p>
+              <p className="text-xs text-slate-500">
+                {student.email} · Reg No: {student.registration_number || "N/A"}
+              </p>
             </div>
           </div>
         </div>
@@ -112,12 +127,35 @@ function AdminStudentDetailContent({ params }: PageProps) {
         {/* KPIs */}
         <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: "Attendance %", value: `${Math.round(student.attendance_percentage)}%`, desc: "Required threshold: 75%", icon: <Percent className="h-4 w-4 text-indigo-400" /> },
-            { label: "Present Sessions", value: student.present_sessions, desc: "Total marked present", icon: <CheckCircle className="h-4 w-4 text-emerald-400" /> },
-            { label: "Absent Sessions", value: student.absent_sessions, desc: "Missed / rejected lectures", icon: <XCircle className="h-4 w-4 text-rose-400" /> },
-            { label: "Total Sessions", value: student.total_sessions, desc: "Lectures logged", icon: <Layers className="h-4 w-4 text-slate-500" /> },
+            {
+              label: "Attendance %",
+              value: `${Math.round(student.attendance_percentage)}%`,
+              desc: "Required threshold: 75%",
+              icon: <Percent className="h-4 w-4 text-indigo-400" />,
+            },
+            {
+              label: "Present Sessions",
+              value: student.present_sessions,
+              desc: "Total marked present",
+              icon: <CheckCircle className="h-4 w-4 text-emerald-400" />,
+            },
+            {
+              label: "Absent Sessions",
+              value: student.absent_sessions,
+              desc: "Missed / rejected lectures",
+              icon: <XCircle className="h-4 w-4 text-rose-400" />,
+            },
+            {
+              label: "Total Sessions",
+              value: student.total_sessions,
+              desc: "Lectures logged",
+              icon: <Layers className="h-4 w-4 text-slate-500" />,
+            },
           ].map((stat, idx) => (
-            <div key={idx} className="glass-panel p-5 rounded-2xl border border-slate-800 bg-slate-950/40">
+            <div
+              key={idx}
+              className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-5"
+            >
               <div className="flex items-center justify-between text-slate-500">
                 <span className="text-[10px] font-bold uppercase tracking-wider">{stat.label}</span>
                 {stat.icon}
@@ -129,47 +167,57 @@ function AdminStudentDetailContent({ params }: PageProps) {
         </section>
 
         {/* Timeline */}
-        <section className="glass-panel p-6 rounded-2xl border border-slate-800 bg-slate-950/40 space-y-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-900 pb-3">
+        <section className="glass-panel space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+          <h3 className="flex items-center gap-2 border-b border-slate-900 pb-3 text-sm font-bold uppercase tracking-wider text-white">
             <Calendar className="h-4 w-4 text-indigo-400" />
             Attendance Timeline
           </h3>
 
-          <div className="relative border-l border-slate-900 ml-4 pl-6 space-y-6">
+          <div className="relative ml-4 space-y-6 border-l border-slate-900 pl-6">
             {student.history.map((item, idx) => (
               <div key={idx} className="relative">
                 {/* Timeline node */}
-                <span className="absolute -left-[33px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-slate-950 border border-slate-850">
-                  <span className={`h-1.5 w-1.5 rounded-full ${item.status === "PRESENT" ? "bg-emerald-400" : item.status === "FLAGGED" ? "bg-amber-400" : "bg-rose-500"}`} />
+                <span className="border-slate-850 absolute -left-[33px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full border bg-slate-950">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${item.status === "PRESENT" ? "bg-emerald-400" : item.status === "FLAGGED" ? "bg-amber-400" : "bg-rose-500"}`}
+                  />
                 </span>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-slate-900 bg-slate-950/60 p-4 gap-4">
+                <div className="flex flex-col gap-4 rounded-xl border border-slate-900 bg-slate-950/60 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h4 className="font-bold text-white text-xs">{item.session_title}</h4>
-                    <p className="text-[10px] text-slate-550 mt-0.5">{item.session_subject}</p>
+                    <h4 className="text-xs font-bold text-white">{item.session_title}</h4>
+                    <p className="text-slate-550 mt-0.5 text-[10px]">{item.session_subject}</p>
                     {item.submitted_at ? (
-                      <p className="text-[9px] text-slate-500 mt-1">Submitted: {new Date(item.submitted_at).toLocaleString()}</p>
+                      <p className="mt-1 text-[9px] text-slate-500">
+                        Submitted: {new Date(item.submitted_at).toLocaleString()}
+                      </p>
                     ) : (
-                      <p className="text-[9px] text-slate-500 mt-1">Status: Absent / No Record</p>
+                      <p className="mt-1 text-[9px] text-slate-500">Status: Absent / No Record</p>
                     )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
                     {item.risk_level && (
-                      <span className={`rounded px-1.5 py-0.2 text-[9px] font-bold ${
-                        item.risk_level === "SAFE" ? "bg-emerald-950/20 text-emerald-400 border border-emerald-800/20" : "bg-rose-950/20 text-rose-400 border border-rose-800/20 animate-pulse"
-                      }`}>
+                      <span
+                        className={`py-0.2 rounded px-1.5 text-[9px] font-bold ${
+                          item.risk_level === "SAFE"
+                            ? "border border-emerald-800/20 bg-emerald-950/20 text-emerald-400"
+                            : "animate-pulse border border-rose-800/20 bg-rose-950/20 text-rose-400"
+                        }`}
+                      >
                         Risk: {item.risk_level} ({item.risk_score})
                       </span>
                     )}
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${getStatusColor(item.status)} flex items-center gap-1`}>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${getStatusColor(item.status)} flex items-center gap-1`}
+                    >
                       {getStatusIcon(item.status)}
                       {item.status}
                     </span>
                     {item.id && (
                       <Link
                         href={`/admin/risk/${item.id}`}
-                        className="text-[10px] text-indigo-400 hover:underline font-bold"
+                        className="text-[10px] font-bold text-indigo-400 hover:underline"
                       >
                         Details
                       </Link>
@@ -188,8 +236,19 @@ function AdminStudentDetailContent({ params }: PageProps) {
 // Simple placeholder error icon wrapper
 function AlertCircleWrapper() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-10 w-10 text-rose-400">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth="1.5"
+      stroke="currentColor"
+      className="h-10 w-10 text-rose-400"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"
+      />
     </svg>
   );
 }

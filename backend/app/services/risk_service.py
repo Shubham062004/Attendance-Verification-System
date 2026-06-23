@@ -12,7 +12,15 @@ from app.models.verification import VerificationSession
 
 
 def log_audit(db: Session, user_id: int, action: str, details: str | None = None) -> None:
-    audit = AuditLog(user_id=user_id, action=action, details=details)
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    audit = AuditLog(
+        actor_id=user_id,
+        actor_name=user.name if user else None,
+        actor_role=user.role if user else None,
+        action_type=action,
+        description=details or "",
+    )
     db.add(audit)
     db.commit()
 
@@ -137,9 +145,9 @@ class RiskService:
             # Check if camera/liveness verification required multiple attempts (attempt_count > 1)
             # OR if audit logs show duplicate attendance attempts
             duplicate_audit_count = db.query(AuditLog).filter(
-                AuditLog.user_id == record.student_id,
-                AuditLog.action == "Duplicate Attendance Attempt",
-                AuditLog.details.like(f"%session {record.session_id}%")
+                AuditLog.actor_id == record.student_id,
+                AuditLog.action_type == "Duplicate Attendance Attempt",
+                AuditLog.description.like(f"%session {record.session_id}%")
             ).count()
 
             if verification_record.attempt_count > 1 or duplicate_audit_count > 0:

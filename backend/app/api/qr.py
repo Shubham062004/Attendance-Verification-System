@@ -57,7 +57,7 @@ def force_expire_qr(
     """
     db.query(SessionToken).filter(
         SessionToken.session_id == id,
-        SessionToken.is_active == True
+        SessionToken.is_active
     ).update({"is_active": False})
     db.commit()
     return {"status": "success", "message": f"Successfully expired current QR token for session {id}"}

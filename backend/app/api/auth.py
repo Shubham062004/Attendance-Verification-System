@@ -35,6 +35,10 @@ def verify_google_id_token(id_token: str) -> dict:
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Google ID token"
             )
         data = response.json()
+        if not isinstance(data, dict):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token response"
+            )
 
         # Verify audience if client id is set
         if settings.GOOGLE_CLIENT_ID and data.get("aud") != settings.GOOGLE_CLIENT_ID:
@@ -89,7 +93,7 @@ def google_auth(payload: GoogleAuthRequest, db: Session = Depends(get_db)):
         db.refresh(user)
 
     access_token = create_access_token(user_id=int(user.id), role=str(user.role))
-    return TokenResponse(access_token=access_token, user=user)
+    return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
 
 
 @router.post("/developer-login", response_model=TokenResponse)
@@ -121,7 +125,7 @@ def developer_login(db: Session = Depends(get_db)):
 
     # Create 30 second token
     access_token = create_access_token(user_id=user.id, role="Developer")
-    return TokenResponse(access_token=access_token, user=user)
+    return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
 
 
 @router.post("/logout")

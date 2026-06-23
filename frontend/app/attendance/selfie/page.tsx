@@ -63,7 +63,7 @@ function captureFrame(video: HTMLVideoElement, mirror = false): string {
  * Returns a Blob and metadata.
  */
 async function compressImage(
-  dataUrl: string
+  dataUrl: string,
 ): Promise<{ blob: Blob; width: number; height: number; size: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -85,7 +85,7 @@ async function compressImage(
           resolve({ blob, width, height, size: blob.size });
         },
         "image/jpeg",
-        COMPRESS_QUALITY
+        COMPRESS_QUALITY,
       );
     };
     img.onerror = () => reject(new Error("Failed to load image for compression"));
@@ -98,8 +98,14 @@ async function compressImage(
  */
 async function uploadToCloudinary(
   blob: Blob,
-  sig: UploadSignatureResponse
-): Promise<{ secure_url: string; public_id: string; bytes: number; width: number; height: number }> {
+  sig: UploadSignatureResponse,
+): Promise<{
+  secure_url: string;
+  public_id: string;
+  bytes: number;
+  width: number;
+  height: number;
+}> {
   const fd = new FormData();
   fd.append("file", blob, "selfie.jpg");
   fd.append("api_key", sig.api_key);
@@ -245,12 +251,14 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
       // Validate dimensions
       if (width < MIN_DIMENSION || height < MIN_DIMENSION) {
         throw new Error(
-          `Image too small (${width}×${height}px). Minimum is ${MIN_DIMENSION}×${MIN_DIMENSION}px.`
+          `Image too small (${width}×${height}px). Minimum is ${MIN_DIMENSION}×${MIN_DIMENSION}px.`,
         );
       }
       // Validate size
       if (size > MAX_SIZE_BYTES) {
-        throw new Error(`Image too large (${(size / 1024 / 1024).toFixed(1)} MB). Maximum is 5 MB.`);
+        throw new Error(
+          `Image too large (${(size / 1024 / 1024).toFixed(1)} MB). Maximum is 5 MB.`,
+        );
       }
 
       setUploadProgress(35);
@@ -304,15 +312,13 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
           done
             ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
             : active
-            ? "border-rose-400 bg-rose-500/20 text-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
-            : "border-slate-700 bg-slate-800 text-slate-600"
+              ? "border-rose-400 bg-rose-500/20 text-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+              : "border-slate-700 bg-slate-800 text-slate-600"
         }`}
       >
         {done ? "✓" : num}
       </div>
-      <span
-        className={`text-[9px] font-medium ${active ? "text-rose-400" : "text-slate-600"}`}
-      >
+      <span className={`text-[9px] font-medium ${active ? "text-rose-400" : "text-slate-600"}`}>
         {label}
       </span>
     </div>
@@ -375,8 +381,7 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
         </div>
 
         {/* Main card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 space-y-5">
-
+        <div className="space-y-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-6">
           {/* Error banners */}
           {cameraError && step === "preview" && (
             <div className="flex items-start gap-3 rounded-lg border border-rose-500/20 bg-rose-600/10 p-4 text-xs text-rose-400">
@@ -407,7 +412,10 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
           {/* ── STEP 1: Camera Preview ── */}
           {step === "preview" && (
             <div className="flex flex-col items-center gap-4">
-              <div className="relative w-full overflow-hidden rounded-xl border border-slate-700 bg-slate-900" style={{ aspectRatio: "4/3" }}>
+              <div
+                className="relative w-full overflow-hidden rounded-xl border border-slate-700 bg-slate-900"
+                style={{ aspectRatio: "4/3" }}
+              >
                 <video
                   ref={videoRef}
                   className="h-full w-full scale-x-[-1] rounded-xl object-cover"
@@ -428,7 +436,7 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
                 )}
                 {/* Ready badge */}
                 {cameraReady && (
-                  <div className="absolute top-2 right-2 rounded-full bg-emerald-600/80 px-2 py-0.5 text-[9px] font-bold text-emerald-100">
+                  <div className="absolute right-2 top-2 rounded-full bg-emerald-600/80 px-2 py-0.5 text-[9px] font-bold text-emerald-100">
                     Live ●
                   </div>
                 )}
@@ -453,15 +461,18 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
           {/* ── STEP 2: Image Preview ── */}
           {step === "capture" && capturedDataUrl && (
             <div className="flex flex-col items-center gap-5">
-              <div className="relative w-full overflow-hidden rounded-xl border border-slate-700 bg-slate-900" style={{ aspectRatio: "4/3" }}>
+              <div
+                className="relative w-full overflow-hidden rounded-xl border border-slate-700 bg-slate-900"
+                style={{ aspectRatio: "4/3" }}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={capturedDataUrl}
                   alt="Captured selfie preview"
                   className="h-full w-full rounded-xl object-cover"
                 />
-                <div className="absolute top-2 left-2 rounded-full bg-slate-900/80 px-2 py-0.5 text-[9px] font-bold text-slate-300">
-                  <ZoomIn className="inline h-3 w-3 mr-0.5" />
+                <div className="absolute left-2 top-2 rounded-full bg-slate-900/80 px-2 py-0.5 text-[9px] font-bold text-slate-300">
+                  <ZoomIn className="mr-0.5 inline h-3 w-3" />
                   Preview
                 </div>
               </div>
@@ -515,9 +526,9 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
                 <p className="text-sm font-bold text-white">Uploading Selfie…</p>
                 <p className="mt-1 text-xs text-slate-500">{uploadProgress}% — Please wait</p>
               </div>
-              <div className="w-full rounded-full bg-slate-800 h-1.5 overflow-hidden">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
                 <div
-                  className="h-full bg-rose-500 transition-all duration-300 rounded-full"
+                  className="h-full rounded-full bg-rose-500 transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -552,14 +563,12 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
                 <div className="flex justify-between border-b border-slate-900/60 pb-1.5">
                   <span className="text-slate-400">File Size</span>
                   <span className="text-white">
-                    {evidence.image_size
-                      ? `${(evidence.image_size / 1024).toFixed(0)} KB`
-                      : "—"}
+                    {evidence.image_size ? `${(evidence.image_size / 1024).toFixed(0)} KB` : "—"}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Uploaded</span>
-                  <span className="text-emerald-400 font-bold">✓ Stored</span>
+                  <span className="font-bold text-emerald-400">✓ Stored</span>
                 </div>
               </div>
 
@@ -567,7 +576,11 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
               {capturedDataUrl && (
                 <div className="w-24 overflow-hidden rounded-lg border border-slate-700">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={capturedDataUrl} alt="Selfie thumbnail" className="w-full object-cover" />
+                  <img
+                    src={capturedDataUrl}
+                    alt="Selfie thumbnail"
+                    className="w-full object-cover"
+                  />
                 </div>
               )}
 
@@ -606,7 +619,7 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
                   disabled={step === "uploading" || step === "success"}
                   className="rounded border border-amber-700/40 bg-amber-900/20 px-3 py-2 text-[10px] font-bold text-amber-400 hover:bg-amber-900/40 disabled:opacity-40"
                 >
-                  <ImageIcon className="mb-1 h-3 w-3 mx-auto" />
+                  <ImageIcon className="mx-auto mb-1 h-3 w-3" />
                   Mock Capture
                 </button>
                 <button
@@ -617,7 +630,7 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
                   disabled={step === "uploading" || step === "success"}
                   className="rounded border border-rose-700/40 bg-rose-900/20 px-3 py-2 text-[10px] font-bold text-rose-400 hover:bg-rose-900/40 disabled:opacity-40"
                 >
-                  <AlertTriangle className="mb-1 h-3 w-3 mx-auto" />
+                  <AlertTriangle className="mx-auto mb-1 h-3 w-3" />
                   Fail Upload
                 </button>
               </div>
@@ -626,7 +639,8 @@ function SelfieCaptureContent({ searchParams }: PageProps) {
         </div>
 
         <p className="text-center text-[10px] text-slate-600">
-          Images are stored securely on Cloudinary. Only evidence metadata is retained on our servers.
+          Images are stored securely on Cloudinary. Only evidence metadata is retained on our
+          servers.
         </p>
 
         {!sessionId && (
