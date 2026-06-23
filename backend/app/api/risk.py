@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -66,7 +67,7 @@ def get_risk_overview(db: Session = Depends(get_db)):
     total_safe = db.query(RiskAssessment).filter(RiskAssessment.risk_level == RiskLevel.SAFE.value).count()
     total_review = db.query(RiskAssessment).filter(RiskAssessment.risk_level == RiskLevel.REVIEW.value).count()
     total_high_risk = db.query(RiskAssessment).filter(RiskAssessment.risk_level == RiskLevel.HIGH_RISK.value).count()
-    pending_reviews = db.query(RiskAssessment).filter(not RiskAssessment.reviewed).count()
+    pending_reviews = db.query(RiskAssessment).filter(RiskAssessment.reviewed.is_(False)).count()
 
     return RiskOverviewStats(
         total_safe=total_safe,
@@ -121,7 +122,7 @@ def get_pending_reviews(db: Session = Depends(get_db)):
     """
     Retrieve all assessments pending review.
     """
-    assessments = db.query(RiskAssessment).filter(not RiskAssessment.reviewed).order_by(RiskAssessment.created_at.desc()).all()
+    assessments = db.query(RiskAssessment).filter(RiskAssessment.reviewed.is_(False)).order_by(desc(RiskAssessment.created_at)).all()
     results = []
     for ass in assessments:
         record = db.query(AttendanceRecord).filter(AttendanceRecord.id == ass.attendance_record_id).first()
@@ -283,8 +284,8 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             class_name="Year 4 / Section A",
             status="ACTIVE",
             created_by=student.id,
-            start_time=datetime.utcnow(),
-            end_time=datetime.utcnow()
+            start_time=datetime.now(UTC),
+            end_time=datetime.now(UTC)
         )
         db.add(session)
         db.commit()
@@ -322,7 +323,7 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             liveness_passed=True,
             status="PASSED",
             attempt_count=1,
-            completed_at=datetime.utcnow()
+            completed_at=datetime.now(UTC)
         )
         db.add(ver)
         db.commit()
@@ -396,7 +397,7 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             liveness_passed=True,
             status="PASSED",
             attempt_count=3,
-            completed_at=datetime.utcnow()
+            completed_at=datetime.now(UTC)
         )
         db.add(ver)
         db.commit()
@@ -441,7 +442,7 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             liveness_passed=True,
             status="PASSED",
             attempt_count=1,
-            completed_at=datetime.utcnow()
+            completed_at=datetime.now(UTC)
         )
         db.add(ver)
         db.commit()
@@ -479,11 +480,9 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
         verification_session_id=verification_id,
         evidence_id=evidence_id,
         status=AttendanceStatus.PRESENT.value,
-        submitted_at=datetime.utcnow() + (_timezone_delta := datetime.utcnow() - session.end_time if payload.scenario_type == "generic_review" else datetime.utcnow() - datetime.utcnow())
+        submitted_at=datetime.now(UTC)
     )
-    # If generic_review, make it late
     if payload.scenario_type == "generic_review" and session.end_time:
-        record.submitted_at = session.end_time + (_timezone_delta := datetime.utcnow() - datetime.utcnow() + (_timezone_delta := datetime.utcnow() - datetime.utcnow()))
         from datetime import timedelta
         record.submitted_at = session.end_time + timedelta(minutes=10)
 
