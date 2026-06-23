@@ -27,3 +27,10 @@ class AuditLogPaginatedResponse(BaseModel):
     total: int
     page: int
     size: int
+
+
+class AnalyticsEventRequest(BaseModel):
+    """Request body for the student-facing analytics event logging endpoint."""
+    action_type: str
+    description: str
+    metadata_json: dict[str, Any] | None = None

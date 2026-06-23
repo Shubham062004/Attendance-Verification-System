@@ -5,11 +5,13 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.attendance import (
     AttendanceRecordResponse,
+    AttendanceStreakResponse,
     AttendanceSubmitRequest,
     AttendanceSubmitResponse,
     SessionAttendanceSummary,
 )
 from app.services.attendance_service import AttendanceService
+from app.services.streak_service import StreakService
 from app.utils.auth import RoleChecker, get_current_user
 
 router = APIRouter(tags=["attendance"])
@@ -37,6 +39,22 @@ def submit_attendance(
         session_id=payload.session_id,
         student_id=int(current_user.id),
     )
+
+
+
+@router.get("/attendance/streak", response_model=AttendanceStreakResponse)
+def get_my_attendance_streak(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get the current consecutive daily attendance streak for the authenticated student.
+    A streak increments for each calendar day that has at least one PRESENT or FLAGGED record.
+    Returns 0 if the student has never marked attendance or the last qualifying day
+    was more than one calendar day ago.
+    """
+    streak = StreakService.get_streak(db, int(current_user.id))
+    return AttendanceStreakResponse(streak=streak)
 
 
 @router.get("/attendance/{id}", response_model=AttendanceRecordResponse)

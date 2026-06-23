@@ -531,6 +531,26 @@ export const apiService = {
     }
     return response.blob();
   },
+
+  // Weather-Hydration Success Screen APIs
+  async getStreak(): Promise<AttendanceStreakResponse> {
+    return request<AttendanceStreakResponse>("/attendance/streak");
+  },
+
+  async logAnalyticsEvent(
+    actionType: string,
+    description: string,
+    metadataJson?: Record<string, unknown>,
+  ): Promise<{ status: string }> {
+    return request<{ status: string }>("/audit/log", {
+      method: "POST",
+      body: JSON.stringify({
+        action_type: actionType,
+        description,
+        metadata_json: metadataJson ?? null,
+      }),
+    });
+  },
 };
 
 export interface AuditLog {
@@ -836,4 +856,8 @@ export interface SessionAttendanceSummary {
   flagged: number;
   rejected: number;
   records: AttendanceRecordResponse[];
+}
+
+export interface AttendanceStreakResponse {
+  streak: number;
 }
