@@ -86,7 +86,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     ).first()
     active_status = active_session.status if active_session else "NONE"
 
-    pending_risk_reviews = db.query(RiskAssessment).filter(not RiskAssessment.reviewed).count()
+    pending_risk_reviews = db.query(RiskAssessment).filter(RiskAssessment.reviewed.is_(False)).count()
     total_records = db.query(AttendanceRecord).count()
 
     # Get sessions created today (or fallbacks)

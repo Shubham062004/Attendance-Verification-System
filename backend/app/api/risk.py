@@ -2,6 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -66,7 +67,7 @@ def get_risk_overview(db: Session = Depends(get_db)):
     total_safe = db.query(RiskAssessment).filter(RiskAssessment.risk_level == RiskLevel.SAFE.value).count()
     total_review = db.query(RiskAssessment).filter(RiskAssessment.risk_level == RiskLevel.REVIEW.value).count()
     total_high_risk = db.query(RiskAssessment).filter(RiskAssessment.risk_level == RiskLevel.HIGH_RISK.value).count()
-    pending_reviews = db.query(RiskAssessment).filter(not RiskAssessment.reviewed).count()
+    pending_reviews = db.query(RiskAssessment).filter(RiskAssessment.reviewed.is_(False)).count()
 
     return RiskOverviewStats(
         total_safe=total_safe,
@@ -121,7 +122,7 @@ def get_pending_reviews(db: Session = Depends(get_db)):
     """
     Retrieve all assessments pending review.
     """
-    assessments = db.query(RiskAssessment).filter(not RiskAssessment.reviewed).order_by(RiskAssessment.created_at.desc()).all()
+    assessments = db.query(RiskAssessment).filter(RiskAssessment.reviewed.is_(False)).order_by(desc(RiskAssessment.created_at)).all()
     results = []
     for ass in assessments:
         record = db.query(AttendanceRecord).filter(AttendanceRecord.id == ass.attendance_record_id).first()
