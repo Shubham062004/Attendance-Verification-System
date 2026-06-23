@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import desc
@@ -69,7 +69,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     """
     total_students = db.query(User).filter(User.role == "Student").count()
 
-    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     
     # Present today (status is PRESENT or FLAGGED)
     present_today = db.query(AttendanceRecord).filter(
@@ -265,7 +265,7 @@ def add_attendance_manually(
         student_id=payload.student_id,
         session_id=payload.session_id,
         status=payload.status,
-        submitted_at=datetime.utcnow()
+        submitted_at=datetime.now(UTC)
     )
     db.add(record)
     db.commit()
@@ -278,7 +278,7 @@ def add_attendance_manually(
         risk_level=RiskLevel.SAFE.value,
         reviewed=True,
         reviewed_by=int(current_user.id),
-        reviewed_at=datetime.utcnow(),
+        reviewed_at=datetime.now(UTC),
         notes=payload.notes or "Manually added by Admin"
     )
     db.add(assessment)
@@ -319,7 +319,7 @@ def override_attendance_record(
 
     assessment.reviewed = True
     assessment.reviewed_by = int(current_user.id)
-    assessment.reviewed_at = datetime.utcnow()
+    assessment.reviewed_at = datetime.now(UTC)
     assessment.notes = payload.notes or f"Overridden status to {payload.status} by Admin."
 
     # If technical issue flag is set, create a technical issue flag

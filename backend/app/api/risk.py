@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -284,8 +284,8 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             class_name="Year 4 / Section A",
             status="ACTIVE",
             created_by=student.id,
-            start_time=datetime.utcnow(),
-            end_time=datetime.utcnow()
+            start_time=datetime.now(UTC),
+            end_time=datetime.now(UTC)
         )
         db.add(session)
         db.commit()
@@ -323,7 +323,7 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             liveness_passed=True,
             status="PASSED",
             attempt_count=1,
-            completed_at=datetime.utcnow()
+            completed_at=datetime.now(UTC)
         )
         db.add(ver)
         db.commit()
@@ -397,7 +397,7 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             liveness_passed=True,
             status="PASSED",
             attempt_count=3,
-            completed_at=datetime.utcnow()
+            completed_at=datetime.now(UTC)
         )
         db.add(ver)
         db.commit()
@@ -442,7 +442,7 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
             liveness_passed=True,
             status="PASSED",
             attempt_count=1,
-            completed_at=datetime.utcnow()
+            completed_at=datetime.now(UTC)
         )
         db.add(ver)
         db.commit()
@@ -480,11 +480,9 @@ def create_mock_scenario(payload: RiskMockRequest, db: Session = Depends(get_db)
         verification_session_id=verification_id,
         evidence_id=evidence_id,
         status=AttendanceStatus.PRESENT.value,
-        submitted_at=datetime.utcnow() + (_timezone_delta := datetime.utcnow() - session.end_time if payload.scenario_type == "generic_review" else datetime.utcnow() - datetime.utcnow())
+        submitted_at=datetime.now(UTC)
     )
-    # If generic_review, make it late
     if payload.scenario_type == "generic_review" and session.end_time:
-        record.submitted_at = session.end_time + (_timezone_delta := datetime.utcnow() - datetime.utcnow() + (_timezone_delta := datetime.utcnow() - datetime.utcnow()))
         from datetime import timedelta
         record.submitted_at = session.end_time + timedelta(minutes=10)
 

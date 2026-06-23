@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -248,7 +248,7 @@ class RiskService:
 
         assessment.reviewed = True
         assessment.reviewed_by = reviewer_id
-        assessment.reviewed_at = datetime.utcnow()
+        assessment.reviewed_at = datetime.now(UTC)
         assessment.notes = notes
 
         # Update core attendance record status
