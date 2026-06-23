@@ -41,7 +41,7 @@ function SessionReportsContent() {
         status: statusFilter === "ALL" ? undefined : statusFilter,
       });
       setSessions(data);
-      
+
       // Initialize reports loading state
       const initialLoading: Record<number, boolean> = {};
       data.forEach((s: AttendanceSession) => {
@@ -101,13 +101,15 @@ function SessionReportsContent() {
           <div className="flex items-center gap-3">
             <Link
               href="/admin/reports"
-              className="flex items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="flex items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
             >
               <ChevronLeft className="h-5 w-5" />
             </Link>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-white">Session-wise Reports</h1>
-              <p className="text-xs text-slate-400">Deep-dive breakdown of student attendance by time slots</p>
+              <p className="text-xs text-slate-400">
+                Deep-dive breakdown of student attendance by time slots
+              </p>
             </div>
           </div>
           <button
@@ -122,7 +124,7 @@ function SessionReportsContent() {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           {/* Filters Sidebar */}
-          <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-5 space-y-6">
+          <div className="glass-panel space-y-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
             <div className="flex items-center gap-2 border-b border-slate-900 pb-3 text-slate-300">
               <SlidersHorizontal className="h-4 w-4 text-indigo-400" />
               <h3 className="text-xs font-bold uppercase tracking-wider">Report Filters</h3>
@@ -130,7 +132,9 @@ function SessionReportsContent() {
 
             {/* Search Input */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Search Session</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Search Session
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                 <input
@@ -145,7 +149,9 @@ function SessionReportsContent() {
 
             {/* Status Select */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Session Status</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Session Status
+              </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -162,11 +168,11 @@ function SessionReportsContent() {
           {/* Main Sessions Grid */}
           <div className="space-y-6 md:col-span-3">
             {loading ? (
-              <div className="flex justify-center items-center py-24">
+              <div className="flex items-center justify-center py-24">
                 <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3 border border-dashed border-slate-900 rounded-2xl">
+              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-900 py-12 text-slate-400">
                 <AlertCircle className="h-10 w-10 text-rose-500" />
                 <p className="text-sm">{error}</p>
                 <button
@@ -177,12 +183,12 @@ function SessionReportsContent() {
                 </button>
               </div>
             ) : filteredSessions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-slate-500 gap-2 border border-dashed border-slate-900 rounded-2xl">
-                <AlertCircle className="h-8 w-8 text-slate-650" />
+              <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-900 py-24 text-slate-500">
+                <AlertCircle className="text-slate-650 h-8 w-8" />
                 <p className="text-xs">No matching sessions found matching these filters.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {filteredSessions.map((session) => {
                   const report = sessionReports[session.id];
                   const reportLoading = loadingReports[session.id];
@@ -190,27 +196,28 @@ function SessionReportsContent() {
                   return (
                     <div
                       key={session.id}
-                      className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-5 flex flex-col justify-between space-y-4 hover:border-slate-700 transition"
+                      className="glass-panel flex flex-col justify-between space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-5 transition hover:border-slate-700"
                     >
                       <div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                             {session.subject} · {session.class_name}
                           </span>
                           <span
-                            className={`rounded-full px-2 py-0.2 text-[9px] font-bold ${
+                            className={`py-0.2 rounded-full px-2 text-[9px] font-bold ${
                               session.status === "ACTIVE"
-                                ? "bg-emerald-950/30 text-emerald-400 border border-emerald-800/40"
-                                : "bg-slate-900 text-slate-500 border border-slate-800"
+                                ? "border border-emerald-800/40 bg-emerald-950/30 text-emerald-400"
+                                : "border border-slate-800 bg-slate-900 text-slate-500"
                             }`}
                           >
                             {session.status}
                           </span>
                         </div>
-                        <h4 className="font-bold text-white mt-1 text-sm">{session.title}</h4>
+                        <h4 className="mt-1 text-sm font-bold text-white">{session.title}</h4>
                         {session.start_time && (
-                          <p className="text-[10px] text-slate-500 mt-1">
-                            Slot: {new Date(session.start_time).toLocaleString([], {
+                          <p className="mt-1 text-[10px] text-slate-500">
+                            Slot:{" "}
+                            {new Date(session.start_time).toLocaleString([], {
                               month: "short",
                               day: "numeric",
                               hour: "2-digit",
@@ -222,35 +229,43 @@ function SessionReportsContent() {
 
                       {/* Session statistics */}
                       {reportLoading ? (
-                        <div className="flex justify-center items-center py-4 bg-slate-900/40 rounded-xl border border-slate-900">
+                        <div className="flex items-center justify-center rounded-xl border border-slate-900 bg-slate-900/40 py-4">
                           <Loader2 className="h-4 w-4 animate-spin text-indigo-400" />
                         </div>
                       ) : report ? (
-                        <div className="grid grid-cols-3 gap-2 text-center py-2.5 rounded-lg bg-slate-900/40 text-[11px] border border-slate-900/65">
+                        <div className="grid grid-cols-3 gap-2 rounded-lg border border-slate-900/65 bg-slate-900/40 py-2.5 text-center text-[11px]">
                           <div>
-                            <span className="text-slate-500 block text-[9px] uppercase tracking-wider font-bold">Present</span>
-                            <span className="text-emerald-400 font-bold">{report.present_count}</span>
+                            <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                              Present
+                            </span>
+                            <span className="font-bold text-emerald-400">
+                              {report.present_count}
+                            </span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[9px] uppercase tracking-wider font-bold">Absent</span>
-                            <span className="text-rose-400 font-bold">{report.absent_count}</span>
+                            <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                              Absent
+                            </span>
+                            <span className="font-bold text-rose-400">{report.absent_count}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[9px] uppercase tracking-wider font-bold">Rate</span>
-                            <span className="text-indigo-400 font-extrabold">
+                            <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                              Rate
+                            </span>
+                            <span className="font-extrabold text-indigo-400">
                               {Math.round(report.attendance_percentage)}%
                             </span>
                           </div>
                         </div>
                       ) : (
-                        <p className="text-center text-[10px] text-slate-550 py-2 border border-slate-900 bg-slate-900/30 rounded-lg">
+                        <p className="text-slate-550 rounded-lg border border-slate-900 bg-slate-900/30 py-2 text-center text-[10px]">
                           Failed to compute stats
                         </p>
                       )}
 
                       <Link
                         href={`/admin/sessions/${session.id}`}
-                        className="w-full text-center py-2 bg-slate-900 hover:bg-slate-850 border border-slate-850 rounded-lg text-xs font-semibold text-slate-300 block"
+                        className="hover:bg-slate-850 border-slate-850 block w-full rounded-lg border bg-slate-900 py-2 text-center text-xs font-semibold text-slate-300"
                       >
                         View Verification Details
                       </Link>

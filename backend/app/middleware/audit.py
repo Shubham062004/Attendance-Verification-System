@@ -1,14 +1,15 @@
 import json
 from typing import Any
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from app.core.logging import logger
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal
 from app.models.user import User
 from app.services.audit_service import AuditService
-from app.core.logging import logger
 
 
 class AuditMiddleware(BaseHTTPMiddleware):
@@ -86,7 +87,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
                 if response.headers.get("content-type") == "application/json" and response_body:
                     try:
                         response_json = json.loads(response_body.decode("utf-8"))
-                    except:
+                    except Exception:
                         pass
 
                 # Fallback to response payload for authentication endpoints (where JWT is generated in current call)
@@ -143,8 +144,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
         actor_role: str | None,
         actor_name: str | None
     ) -> list[tuple[str, str | None, int | None, str, dict[str, Any] | None]]:
-        # Returns list of tuples: (action_type, entity_type, entity_id, description, metadata_json)
-        records = []
+        records: list[tuple[str, str | None, int | None, str, dict[str, Any] | None]] = []
 
         # 1. Authentication
         if path == "/auth/google" and method == "POST":
@@ -174,7 +174,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
                 action,
                 "User",
                 None,
-                f"User logged out of the session.",
+                "User logged out of the session.",
                 None
             ))
 
@@ -219,7 +219,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             record_id = response_json.get("record_id")
             try:
                 req_data = json.loads(request_body.decode("utf-8"))
-            except:
+            except Exception:
                 req_data = {}
             student_id = req_data.get("student_id")
             session_id = req_data.get("session_id")
@@ -237,11 +237,11 @@ class AuditMiddleware(BaseHTTPMiddleware):
             parts = path.split("/")
             try:
                 record_id = int(parts[3])
-            except:
+            except Exception:
                 record_id = None
             try:
                 req_data = json.loads(request_body.decode("utf-8"))
-            except:
+            except Exception:
                 req_data = {}
             status = req_data.get("status")
             records.append((
@@ -265,7 +265,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             parts = path.split("/")
             try:
                 record_id = int(parts[3])
-            except:
+            except Exception:
                 record_id = None
             records.append((
                 "Attendance Deleted",
@@ -291,7 +291,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             parts = path.split("/")
             try:
                 session_id = int(parts[2])
-            except:
+            except Exception:
                 session_id = None
             code = response_json.get("session_code")
             records.append((
@@ -306,7 +306,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             parts = path.split("/")
             try:
                 session_id = int(parts[2])
-            except:
+            except Exception:
                 session_id = None
             records.append((
                 "Session Ended",
@@ -320,7 +320,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             parts = path.split("/")
             try:
                 session_id = int(parts[2])
-            except:
+            except Exception:
                 session_id = None
             records.append((
                 "Session Reopened",
@@ -348,12 +348,12 @@ class AuditMiddleware(BaseHTTPMiddleware):
             parts = path.split("/")
             try:
                 assessment_id = int(parts[2])
-            except:
+            except Exception:
                 assessment_id = None
             record_id = response_json.get("attendance_record_id")
             try:
                 req_data = json.loads(request_body.decode("utf-8"))
-            except:
+            except Exception:
                 req_data = {}
             status_choice = req_data.get("status")
             action = "Risk Approved" if status_choice == "PRESENT" else "Risk Rejected"

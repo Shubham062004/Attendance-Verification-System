@@ -53,24 +53,41 @@ async function fetchWeather(): Promise<WeatherData | null> {
     });
     const { latitude, longitude } = position.coords;
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=apparent_temperature&forecast_days=1`
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=apparent_temperature&forecast_days=1`,
     );
     if (!res.ok) return null;
     const data = await res.json();
     const wc = data.current_weather?.weathercode ?? 0;
     const descriptions: Record<number, string> = {
-      0: "Clear sky ☀️", 1: "Mainly clear 🌤", 2: "Partly cloudy ⛅", 3: "Overcast ☁️",
-      45: "Foggy 🌫️", 48: "Depositing rime fog 🌫️",
-      51: "Light drizzle 🌦", 53: "Moderate drizzle 🌦", 55: "Dense drizzle 🌧",
-      61: "Slight rain 🌧", 63: "Moderate rain 🌧", 65: "Heavy rain 🌧",
-      71: "Slight snow 🌨", 73: "Moderate snow 🌨", 75: "Heavy snow ❄️",
-      80: "Slight showers 🌦", 81: "Moderate showers 🌧", 82: "Violent showers ⛈",
-      95: "Thunderstorm ⛈", 96: "Thunderstorm with hail ⛈", 99: "Thunderstorm with heavy hail ⛈",
+      0: "Clear sky ☀️",
+      1: "Mainly clear 🌤",
+      2: "Partly cloudy ⛅",
+      3: "Overcast ☁️",
+      45: "Foggy 🌫️",
+      48: "Depositing rime fog 🌫️",
+      51: "Light drizzle 🌦",
+      53: "Moderate drizzle 🌦",
+      55: "Dense drizzle 🌧",
+      61: "Slight rain 🌧",
+      63: "Moderate rain 🌧",
+      65: "Heavy rain 🌧",
+      71: "Slight snow 🌨",
+      73: "Moderate snow 🌨",
+      75: "Heavy snow ❄️",
+      80: "Slight showers 🌦",
+      81: "Moderate showers 🌧",
+      82: "Violent showers ⛈",
+      95: "Thunderstorm ⛈",
+      96: "Thunderstorm with hail ⛈",
+      99: "Thunderstorm with heavy hail ⛈",
     };
     const apparentNow = data.hourly?.apparent_temperature?.[new Date().getHours()] ?? null;
     return {
       temperature: Math.round(data.current_weather?.temperature ?? 0),
-      feels_like: apparentNow !== null ? Math.round(apparentNow) : Math.round(data.current_weather?.temperature ?? 0),
+      feels_like:
+        apparentNow !== null
+          ? Math.round(apparentNow)
+          : Math.round(data.current_weather?.temperature ?? 0),
       description: descriptions[wc] ?? "Unknown ☁️",
     };
   } catch {
@@ -94,13 +111,18 @@ const HYDRATION_MSGS = [
 // ---------------------------------------------------------------------------
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { color: string; label: string }> = {
-    PRESENT: { color: "border-emerald-500/30 bg-emerald-600/10 text-emerald-400", label: "✓ Present" },
+    PRESENT: {
+      color: "border-emerald-500/30 bg-emerald-600/10 text-emerald-400",
+      label: "✓ Present",
+    },
     FLAGGED: { color: "border-amber-500/30 bg-amber-600/10 text-amber-400", label: "⚑ Flagged" },
     REJECTED: { color: "border-rose-500/30 bg-rose-600/10 text-rose-400", label: "✗ Rejected" },
   };
   const cfg = map[status] ?? map.PRESENT;
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${cfg.color}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${cfg.color}`}
+    >
       {cfg.label}
     </span>
   );
@@ -126,11 +148,13 @@ function PrereqCard({
         status === "pass"
           ? "border-emerald-800/40 bg-emerald-950/30"
           : status === "fail"
-          ? "border-rose-800/40 bg-rose-950/30"
-          : "border-slate-800 bg-slate-900/40"
+            ? "border-rose-800/40 bg-rose-950/30"
+            : "border-slate-800 bg-slate-900/40"
       }`}
     >
-      <div className={`shrink-0 ${status === "pass" ? "text-emerald-400" : status === "fail" ? "text-rose-400" : "text-slate-500"}`}>
+      <div
+        className={`shrink-0 ${status === "pass" ? "text-emerald-400" : status === "fail" ? "text-rose-400" : "text-slate-500"}`}
+      >
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -174,7 +198,9 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
 
   // Weather + hydration
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [hydrationMsg] = useState(() => HYDRATION_MSGS[Math.floor(Math.random() * HYDRATION_MSGS.length)]);
+  const [hydrationMsg] = useState(
+    () => HYDRATION_MSGS[Math.floor(Math.random() * HYDRATION_MSGS.length)],
+  );
 
   // ---------------------------------------------------------------------------
   // Load prerequisites
@@ -196,9 +222,9 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
 
         // Each is an array — pick the student's latest record
         // (student-scoped: backend already filters to my own session records for non-admin)
-        setLocation(Array.isArray(locData) ? locData[0] ?? null : null);
-        setVerification(Array.isArray(verData) ? verData[0] ?? null : null);
-        setEvidence(Array.isArray(evData) ? evData[0] ?? null : null);
+        setLocation(Array.isArray(locData) ? (locData[0] ?? null) : null);
+        setVerification(Array.isArray(verData) ? (verData[0] ?? null) : null);
+        setEvidence(Array.isArray(evData) ? (evData[0] ?? null) : null);
       } catch (err: unknown) {
         setPrereqError(err instanceof Error ? err.message : "Failed to load prerequisites");
       } finally {
@@ -222,7 +248,11 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
       fetchWeather().then(setWeather);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to submit attendance";
-      if (msg.includes("409") || msg.toLowerCase().includes("already marked") || msg.toLowerCase().includes("duplicate")) {
+      if (
+        msg.includes("409") ||
+        msg.toLowerCase().includes("already marked") ||
+        msg.toLowerCase().includes("duplicate")
+      ) {
         setPhase("duplicate");
       } else {
         setSubmitError(msg);
@@ -287,7 +317,9 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
           {/* Summary card */}
           <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
             <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Status</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Status
+              </span>
               <StatusBadge status={submitResult.status} />
             </div>
             {[
@@ -361,12 +393,13 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-4 text-slate-100">
         <div className="w-full max-w-md space-y-5 text-center">
-          <div className="flex h-20 w-20 mx-auto items-center justify-center rounded-full border border-amber-500/30 bg-amber-600/10">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-amber-500/30 bg-amber-600/10">
             <ClipboardCheck className="h-10 w-10 text-amber-400" />
           </div>
           <h1 className="text-xl font-bold text-amber-400">Already Submitted</h1>
           <p className="text-xs text-slate-500">
-            Your attendance for this session has already been recorded. Each student may only submit once per session.
+            Your attendance for this session has already been recorded. Each student may only submit
+            once per session.
           </p>
           <Link
             href="/student/attendance"
@@ -403,7 +436,7 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
         </header>
 
         {/* Prerequisite checks */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5 space-y-3">
+        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
           <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
             Verification Checklist
           </h2>
@@ -476,12 +509,12 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
               />
               <div className="space-y-1 text-[11px]">
                 <p className="font-semibold text-white">Photo on file</p>
-                <p className="text-slate-500">
-                  {new Date(evidence.uploaded_at).toLocaleString()}
-                </p>
+                <p className="text-slate-500">{new Date(evidence.uploaded_at).toLocaleString()}</p>
                 <p className="text-slate-500">
                   {evidence.image_size ? `${(evidence.image_size / 1024).toFixed(0)} KB` : ""}
-                  {evidence.image_width ? ` · ${evidence.image_width}×${evidence.image_height}px` : ""}
+                  {evidence.image_width
+                    ? ` · ${evidence.image_width}×${evidence.image_height}px`
+                    : ""}
                 </p>
               </div>
             </div>
@@ -518,7 +551,10 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
                 {!locationOk && (
                   <p>
                     ·{" "}
-                    <Link href={`/attendance/location?session_id=${sessionId}`} className="underline">
+                    <Link
+                      href={`/attendance/location?session_id=${sessionId}`}
+                      className="underline"
+                    >
                       Complete Location Verification
                     </Link>
                   </p>
@@ -526,7 +562,10 @@ function AttendanceReviewContent({ searchParams }: PageProps) {
                 {!verificationOk && (
                   <p>
                     ·{" "}
-                    <Link href={`/attendance/verification?session_id=${sessionId}`} className="underline">
+                    <Link
+                      href={`/attendance/verification?session_id=${sessionId}`}
+                      className="underline"
+                    >
                       Complete Liveness Verification
                     </Link>
                   </p>

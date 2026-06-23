@@ -1,16 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.attendance import router as attendance_router
-from app.api.risk import router as risk_router
 from app.api.admin import router as admin_router
-from app.api.auth import router as auth_router
+from app.api.attendance import router as attendance_router
 from app.api.audit import router as audit_router
+from app.api.auth import router as auth_router
 from app.api.evidence import router as evidence_router
 from app.api.health import router as health_router
 from app.api.location import router as location_router
 from app.api.qr import router as qr_router
 from app.api.reports import router as reports_router
+from app.api.risk import router as risk_router
 from app.api.sessions import router as sessions_router
 from app.api.users import router as users_router
 from app.api.verification import router as verification_router

@@ -73,13 +73,15 @@ function StudentReportsContent() {
           <div className="flex items-center gap-3">
             <Link
               href="/admin/reports"
-              className="flex items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 p-2 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="flex items-center justify-center rounded-lg border border-slate-800 bg-slate-900/60 p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
             >
               <ChevronLeft className="h-5 w-5" />
             </Link>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-white">Student-wise Reports</h1>
-              <p className="text-xs text-slate-400">Track and analyze individual student metrics and overall participation</p>
+              <p className="text-xs text-slate-400">
+                Track and analyze individual student metrics and overall participation
+              </p>
             </div>
           </div>
           <button
@@ -94,7 +96,7 @@ function StudentReportsContent() {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           {/* Filters Sidebar */}
-          <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-5 space-y-6">
+          <div className="glass-panel space-y-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
             <div className="flex items-center gap-2 border-b border-slate-900 pb-3 text-slate-300">
               <SlidersHorizontal className="h-4 w-4 text-indigo-400" />
               <h3 className="text-xs font-bold uppercase tracking-wider">Report Filters</h3>
@@ -102,7 +104,9 @@ function StudentReportsContent() {
 
             {/* Search Input */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Search Student</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Search Student
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                 <input
@@ -127,7 +131,7 @@ function StudentReportsContent() {
                 max="100"
                 value={minAttendance}
                 onChange={(e) => setMinAttendance(e.target.value)}
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="h-1 w-full cursor-pointer appearance-none rounded-lg bg-slate-800 accent-indigo-500"
               />
             </div>
 
@@ -143,7 +147,7 @@ function StudentReportsContent() {
                 max="100"
                 value={maxAttendance}
                 onChange={(e) => setMaxAttendance(e.target.value)}
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="h-1 w-full cursor-pointer appearance-none rounded-lg bg-slate-800 accent-indigo-500"
               />
             </div>
           </div>
@@ -151,11 +155,11 @@ function StudentReportsContent() {
           {/* Main Table Content */}
           <div className="space-y-6 md:col-span-3">
             {loading ? (
-              <div className="flex justify-center items-center py-24">
+              <div className="flex items-center justify-center py-24">
                 <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3 border border-dashed border-slate-900 rounded-2xl">
+              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-900 py-12 text-slate-400">
                 <AlertCircle className="h-10 w-10 text-rose-500" />
                 <p className="text-sm">{error}</p>
                 <button
@@ -166,14 +170,14 @@ function StudentReportsContent() {
                 </button>
               </div>
             ) : filteredStudents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-slate-500 gap-2 border border-dashed border-slate-900 rounded-2xl">
-                <AlertCircle className="h-8 w-8 text-slate-650" />
+              <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-900 py-24 text-slate-500">
+                <AlertCircle className="text-slate-650 h-8 w-8" />
                 <p className="text-xs">No students match the criteria.</p>
               </div>
             ) : (
-              <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-6 overflow-hidden">
+              <div className="glass-panel overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full border-collapse text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-900 bg-slate-950/60 font-semibold text-slate-400">
                         <th className="p-3">Student Name</th>
@@ -186,28 +190,36 @@ function StudentReportsContent() {
                     </thead>
                     <tbody className="divide-y divide-slate-900 text-slate-300">
                       {filteredStudents.map((student) => (
-                        <tr key={student.id} className="hover:bg-slate-900/40 transition">
+                        <tr key={student.id} className="transition hover:bg-slate-900/40">
                           <td className="p-3">
                             <div className="flex items-center gap-2">
-                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 border border-slate-800 font-bold text-white uppercase text-[10px]">
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] font-bold uppercase text-white">
                                 {student.name ? student.name[0] : "S"}
                               </div>
                               <div>
-                                <p className="font-semibold text-white">{student.name || "Unknown Student"}</p>
+                                <p className="font-semibold text-white">
+                                  {student.name || "Unknown Student"}
+                                </p>
                                 <p className="text-[9px] text-slate-500">{student.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="p-3 text-slate-450">{student.registration_number || "N/A"}</td>
-                          <td className="p-3 text-center text-emerald-400 font-semibold">{student.present_count}</td>
-                          <td className="p-3 text-center text-rose-400 font-semibold">{student.absent_count}</td>
+                          <td className="text-slate-450 p-3">
+                            {student.registration_number || "N/A"}
+                          </td>
+                          <td className="p-3 text-center font-semibold text-emerald-400">
+                            {student.present_count}
+                          </td>
+                          <td className="p-3 text-center font-semibold text-rose-400">
+                            {student.absent_count}
+                          </td>
                           <td className="p-3 text-center font-extrabold text-indigo-400">
                             {Math.round(student.attendance_percentage)}%
                           </td>
                           <td className="p-3 text-center">
                             <Link
                               href={`/admin/students/${student.id}`}
-                              className="inline-block rounded border border-slate-800 bg-slate-900 px-3 py-1 text-[10px] font-bold text-slate-300 hover:bg-slate-800 hover:text-white transition"
+                              className="inline-block rounded border border-slate-800 bg-slate-900 px-3 py-1 text-[10px] font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white"
                             >
                               Profile Detail
                             </Link>

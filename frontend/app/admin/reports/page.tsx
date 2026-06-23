@@ -4,7 +4,12 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { ProtectedRoute } from "../../../components/ProtectedRoute";
-import { apiService, EODReportResponse, AttendanceSummaryResponse, EODReportStudentItem } from "../../../services/api";
+import {
+  apiService,
+  EODReportResponse,
+  AttendanceSummaryResponse,
+  EODReportStudentItem,
+} from "../../../services/api";
 import {
   Shield,
   LogOut,
@@ -27,7 +32,7 @@ import {
 
 function ReportsDashboardContent() {
   const { user, logout } = useAuth();
-  
+
   // Date selector (default to today's date formatted as YYYY-MM-DD)
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
@@ -85,7 +90,7 @@ function ReportsDashboardContent() {
   const handleExport = async (format: "csv" | "excel" | "pdf") => {
     try {
       setExportState({ format, status: "preparing", progress: 10 });
-      
+
       // Simulate progress for visual excellence
       const interval = setInterval(() => {
         setExportState((prev) => {
@@ -99,17 +104,17 @@ function ReportsDashboardContent() {
 
       const blob = await apiService.downloadReport(format, selectedDate);
       clearInterval(interval);
-      
+
       setExportState({ format, status: "downloading", progress: 100 });
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      
+
       const fileExtensions = { csv: "csv", excel: "xlsx", pdf: "pdf" };
       a.download = `Attendance_Report_${selectedDate}.${fileExtensions[format]}`;
-      
+
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -143,8 +148,12 @@ function ReportsDashboardContent() {
               <Shield className="h-7 w-7 text-indigo-400" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white">Attendance Export Center</h1>
-              <p className="text-xs text-slate-400">Generate, view, and export dynamic attendance sheets</p>
+              <h1 className="text-xl font-bold tracking-tight text-white">
+                Attendance Export Center
+              </h1>
+              <p className="text-xs text-slate-400">
+                Generate, view, and export dynamic attendance sheets
+              </p>
             </div>
           </div>
           <button
@@ -161,45 +170,62 @@ function ReportsDashboardContent() {
           {/* Navigation Sidebar */}
           <div className="space-y-6">
             <div className="glass-panel space-y-1 rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
-              <Link href="/admin" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200">
+              <Link
+                href="/admin"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
+              >
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Dashboard Overview</span>
               </Link>
-              <Link href="/admin/attendance" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200">
+              <Link
+                href="/admin/attendance"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
+              >
                 <Users className="h-4 w-4" />
                 <span>Manage Attendance</span>
               </Link>
-              <Link href="/admin/history" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200">
+              <Link
+                href="/admin/history"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
+              >
                 <Calendar className="h-4 w-4" />
                 <span>Student History</span>
               </Link>
-              <Link href="/admin/reports" className="flex w-full items-center gap-3 rounded-lg bg-indigo-600/10 px-3 py-2.5 text-xs font-bold text-indigo-400 transition">
+              <Link
+                href="/admin/reports"
+                className="flex w-full items-center gap-3 rounded-lg bg-indigo-600/10 px-3 py-2.5 text-xs font-bold text-indigo-400 transition"
+              >
                 <BarChart3 className="h-4 w-4" />
                 <span>Reports & Exports</span>
               </Link>
-              <Link href="/admin/audit" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200">
+              <Link
+                href="/admin/audit"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
+              >
                 <Shield className="h-4 w-4 text-indigo-400" />
                 <span>Audit Logs</span>
               </Link>
             </div>
 
             {/* Quick Summary Cards (Sidebar Links) */}
-            <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-5 space-y-3">
-              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Report Types</h4>
+            <div className="glass-panel space-y-3 rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Report Types
+              </h4>
               <div className="space-y-2">
                 <Link
                   href="/admin/reports/sessions"
-                  className="block rounded-lg border border-slate-900 bg-slate-950/60 p-2.5 text-xs text-slate-300 hover:border-slate-800 hover:text-white transition"
+                  className="block rounded-lg border border-slate-900 bg-slate-950/60 p-2.5 text-xs text-slate-300 transition hover:border-slate-800 hover:text-white"
                 >
                   <p className="font-bold">Session Reports</p>
-                  <p className="text-[9px] text-slate-500 mt-0.5">Stats of individual slots</p>
+                  <p className="mt-0.5 text-[9px] text-slate-500">Stats of individual slots</p>
                 </Link>
                 <Link
                   href="/admin/reports/students"
-                  className="block rounded-lg border border-slate-900 bg-slate-950/60 p-2.5 text-xs text-slate-300 hover:border-slate-800 hover:text-white transition"
+                  className="block rounded-lg border border-slate-900 bg-slate-950/60 p-2.5 text-xs text-slate-300 transition hover:border-slate-800 hover:text-white"
                 >
                   <p className="font-bold">Student Reports</p>
-                  <p className="text-[9px] text-slate-500 mt-0.5">Average metrics per student</p>
+                  <p className="mt-0.5 text-[9px] text-slate-500">Average metrics per student</p>
                 </Link>
               </div>
             </div>
@@ -211,83 +237,100 @@ function ReportsDashboardContent() {
             <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {loadingSummary ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-4 animate-pulse h-20" />
+                  <div
+                    key={i}
+                    className="glass-panel h-20 animate-pulse rounded-2xl border border-slate-800 bg-slate-950/40 p-4"
+                  />
                 ))
               ) : summaryData ? (
                 <>
                   <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
                     <div className="flex items-center justify-between text-slate-500">
-                      <span className="text-[9px] font-bold uppercase tracking-wider">Highest Att%</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider">
+                        Highest Att%
+                      </span>
                       <TrendingUp className="h-4 w-4 text-emerald-400" />
                     </div>
                     <h3 className="mt-2 text-base font-extrabold text-white">
                       {Math.round(summaryData.highest_attendance_pct)}%
                     </h3>
-                    <p className="text-[8px] text-slate-400 truncate mt-0.5">
+                    <p className="mt-0.5 truncate text-[8px] text-slate-400">
                       {summaryData.highest_attendance_student || "None"}
                     </p>
                   </div>
 
                   <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
                     <div className="flex items-center justify-between text-slate-500">
-                      <span className="text-[9px] font-bold uppercase tracking-wider">Lowest Att%</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider">
+                        Lowest Att%
+                      </span>
                       <TrendingDown className="h-4 w-4 text-rose-400" />
                     </div>
                     <h3 className="mt-2 text-base font-extrabold text-white">
                       {Math.round(summaryData.lowest_attendance_pct)}%
                     </h3>
-                    <p className="text-[8px] text-slate-400 truncate mt-0.5">
+                    <p className="mt-0.5 truncate text-[8px] text-slate-400">
                       {summaryData.lowest_attendance_student || "None"}
                     </p>
                   </div>
 
                   <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
                     <div className="flex items-center justify-between text-slate-500">
-                      <span className="text-[9px] font-bold uppercase tracking-wider">Average Att%</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider">
+                        Average Att%
+                      </span>
                       <Percent className="h-4 w-4 text-indigo-400" />
                     </div>
                     <h3 className="mt-2 text-base font-extrabold text-white">
                       {Math.round(summaryData.average_attendance_pct)}%
                     </h3>
-                    <p className="text-[8px] text-slate-500 mt-0.5">All-time average</p>
+                    <p className="mt-0.5 text-[8px] text-slate-500">All-time average</p>
                   </div>
 
                   <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
                     <div className="flex items-center justify-between text-slate-500">
-                      <span className="text-[9px] font-bold uppercase tracking-wider">Total Present</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider">
+                        Total Present
+                      </span>
                       <CheckCircle className="h-4 w-4 text-emerald-400" />
                     </div>
                     <h3 className="mt-2 text-base font-extrabold text-white">
                       {summaryData.total_present}
                     </h3>
-                    <p className="text-[8px] text-slate-500 mt-0.5">Records marked present</p>
+                    <p className="mt-0.5 text-[8px] text-slate-500">Records marked present</p>
                   </div>
 
                   <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
                     <div className="flex items-center justify-between text-slate-500">
-                      <span className="text-[9px] font-bold uppercase tracking-wider">Total Absent</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider">
+                        Total Absent
+                      </span>
                       <XCircle className="h-4 w-4 text-rose-400" />
                     </div>
                     <h3 className="mt-2 text-base font-extrabold text-white">
                       {summaryData.total_absent}
                     </h3>
-                    <p className="text-[8px] text-slate-500 mt-0.5">Records marked absent</p>
+                    <p className="mt-0.5 text-[8px] text-slate-500">Records marked absent</p>
                   </div>
                 </>
               ) : null}
             </section>
 
             {/* Date Picker & Export Center panel */}
-            <section className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-6 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <section className="glass-panel space-y-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">Daily EOD Report Export</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Select a date to preview attendance and generate downloads</p>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                    Daily EOD Report Export
+                  </h3>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Select a date to preview attendance and generate downloads
+                  </p>
                 </div>
-                
+
                 {/* Custom Styled Date Picker */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 font-semibold">Date:</span>
+                  <span className="text-xs font-semibold text-slate-400">Date:</span>
                   <input
                     type="date"
                     value={selectedDate}
@@ -298,40 +341,46 @@ function ReportsDashboardContent() {
               </div>
 
               {/* Download Buttons Panel */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <button
                   onClick={() => handleExport("csv")}
                   disabled={exportState.status !== "idle" && exportState.status !== "done"}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs font-bold text-slate-200 transition hover:bg-slate-900 hover:border-slate-700 cursor-pointer disabled:opacity-50"
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs font-bold text-slate-200 transition hover:border-slate-700 hover:bg-slate-900 disabled:opacity-50"
                 >
                   <FileCode className="h-5 w-5 text-indigo-400" />
                   <div className="text-left">
                     <p className="font-semibold text-white">Export CSV</p>
-                    <p className="text-[9px] text-slate-500 font-normal">Excel-compatible plain text</p>
+                    <p className="text-[9px] font-normal text-slate-500">
+                      Excel-compatible plain text
+                    </p>
                   </div>
                 </button>
 
                 <button
                   onClick={() => handleExport("excel")}
                   disabled={exportState.status !== "idle" && exportState.status !== "done"}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs font-bold text-slate-200 transition hover:bg-slate-900 hover:border-slate-700 cursor-pointer disabled:opacity-50"
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs font-bold text-slate-200 transition hover:border-slate-700 hover:bg-slate-900 disabled:opacity-50"
                 >
                   <FileSpreadsheet className="h-5 w-5 text-emerald-400" />
                   <div className="text-left">
                     <p className="font-semibold text-white">Export Excel</p>
-                    <p className="text-[9px] text-slate-500 font-normal">Styled workbook with widths</p>
+                    <p className="text-[9px] font-normal text-slate-500">
+                      Styled workbook with widths
+                    </p>
                   </div>
                 </button>
 
                 <button
                   onClick={() => handleExport("pdf")}
                   disabled={exportState.status !== "idle" && exportState.status !== "done"}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs font-bold text-slate-200 transition hover:bg-slate-900 hover:border-slate-700 cursor-pointer disabled:opacity-50"
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs font-bold text-slate-200 transition hover:border-slate-700 hover:bg-slate-900 disabled:opacity-50"
                 >
                   <FileText className="h-5 w-5 text-rose-400" />
                   <div className="text-left">
                     <p className="font-semibold text-white">Export PDF</p>
-                    <p className="text-[9px] text-slate-500 font-normal">Professional printable layout</p>
+                    <p className="text-[9px] font-normal text-slate-500">
+                      Professional printable layout
+                    </p>
                   </div>
                 </button>
               </div>
@@ -339,7 +388,7 @@ function ReportsDashboardContent() {
               {/* Export Status / Progress Bar */}
               {exportState.status !== "idle" && (
                 <div className="rounded-xl border border-slate-900 bg-slate-950/60 p-4">
-                  <div className="flex items-center justify-between text-xs font-semibold mb-2">
+                  <div className="mb-2 flex items-center justify-between text-xs font-semibold">
                     <span className="text-slate-300">
                       {exportState.status === "preparing" && "Assembling data..."}
                       {exportState.status === "downloading" && "Downloading file..."}
@@ -348,8 +397,8 @@ function ReportsDashboardContent() {
                     </span>
                     <span className="text-slate-400">{exportState.progress}%</span>
                   </div>
-                  
-                  <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-900">
                     <div
                       className={`h-full transition-all duration-300 ${
                         exportState.status === "error" ? "bg-rose-500" : "bg-indigo-500"
@@ -359,7 +408,7 @@ function ReportsDashboardContent() {
                   </div>
 
                   {exportState.status === "error" && (
-                    <p className="text-[10px] text-rose-400 mt-2 flex items-center gap-1">
+                    <p className="mt-2 flex items-center gap-1 text-[10px] text-rose-400">
                       <AlertCircle className="h-3 w-3" />
                       <span>{exportState.errorMsg}</span>
                     </p>
@@ -369,19 +418,21 @@ function ReportsDashboardContent() {
             </section>
 
             {/* Preview Sheet before export */}
-            <section className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-6 space-y-4">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Report Preview Sheet</h3>
-              
+            <section className="glass-panel space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                Report Preview Sheet
+              </h3>
+
               {loadingEod ? (
-                <div className="flex justify-center items-center py-12">
+                <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
                 </div>
               ) : eodData && eodData.records.length > 0 ? (
                 <div className="overflow-x-auto rounded-xl border border-slate-900">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full border-collapse text-left text-xs">
                     <thead>
                       <tr className="border-b border-slate-900 bg-slate-950/60 font-semibold text-slate-400">
-                        <th className="p-3 text-center w-12">S.No</th>
+                        <th className="w-12 p-3 text-center">S.No</th>
                         <th className="p-3">Student Name</th>
                         <th className="p-3">Reg No</th>
                         <th className="p-3 text-center">10-11</th>
@@ -394,21 +445,27 @@ function ReportsDashboardContent() {
                     </thead>
                     <tbody className="divide-y divide-slate-900 text-slate-300">
                       {eodData.records.map((row: EODReportStudentItem) => (
-                        <tr key={row.s_no} className="hover:bg-slate-900/40 transition">
+                        <tr key={row.s_no} className="transition hover:bg-slate-900/40">
                           <td className="p-3 text-center text-slate-500">{row.s_no}</td>
                           <td className="p-3 font-semibold text-white">{row.student_name}</td>
                           <td className="p-3 text-slate-400">{row.registration_number}</td>
-                          
+
                           {/* Slot Columns */}
-                          {[row.slot_10_11, row.slot_11_12, row.slot_12_13, row.slot_14_15, row.slot_15_16].map((slotVal, sIdx) => (
+                          {[
+                            row.slot_10_11,
+                            row.slot_11_12,
+                            row.slot_12_13,
+                            row.slot_14_15,
+                            row.slot_15_16,
+                          ].map((slotVal, sIdx) => (
                             <td key={sIdx} className="p-3 text-center">
                               <span
                                 className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
                                   slotVal === "Present"
-                                    ? "bg-emerald-950/30 text-emerald-400 border border-emerald-800/20"
+                                    ? "border border-emerald-800/20 bg-emerald-950/30 text-emerald-400"
                                     : slotVal === "Absent"
-                                    ? "bg-rose-950/30 text-rose-400 border border-rose-800/20"
-                                    : "bg-slate-900/40 text-slate-500"
+                                      ? "border border-rose-800/20 bg-rose-950/30 text-rose-400"
+                                      : "bg-slate-900/40 text-slate-500"
                                 }`}
                               >
                                 {slotVal}
@@ -416,16 +473,20 @@ function ReportsDashboardContent() {
                             </td>
                           ))}
 
-                          <td className="p-3 text-center font-extrabold text-indigo-400">{row.attendance_percentage}</td>
+                          <td className="p-3 text-center font-extrabold text-indigo-400">
+                            {row.attendance_percentage}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-slate-500 gap-2 border border-dashed border-slate-900 rounded-xl">
+                <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-900 py-12 text-slate-500">
                   <AlertCircle className="h-8 w-8 text-slate-600" />
-                  <p className="text-xs">No attendance session data exists for the selected date.</p>
+                  <p className="text-xs">
+                    No attendance session data exists for the selected date.
+                  </p>
                 </div>
               )}
             </section>

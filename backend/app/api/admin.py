@@ -310,7 +310,6 @@ def override_attendance_record(
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attendance record not found")
 
-    old_status = record.status
     record.status = payload.status
 
     # Retrieve or create risk assessment

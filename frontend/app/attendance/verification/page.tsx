@@ -46,8 +46,7 @@ interface PageProps {
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-const MEDIAPIPE_WASM =
-  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm";
+const MEDIAPIPE_WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm";
 const MEDIAPIPE_MODEL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 
@@ -79,7 +78,7 @@ function euclidean(p1: { x: number; y: number }, p2: { x: number; y: number }): 
 function computeEAR(
   landmarks: { x: number; y: number }[],
   upper: number[],
-  lower: number[]
+  lower: number[],
 ): number {
   const vertical =
     (euclidean(landmarks[upper[0]], landmarks[lower[0]]) +
@@ -114,7 +113,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line
   const landmarkerRef = useRef<any>(null);
   const blinkFrameCountRef = useRef(0);
   const isProcessingRef = useRef(false);
@@ -131,8 +130,9 @@ function CameraVerificationContent({ searchParams }: PageProps) {
   const [loadingMediaPipe, setLoadingMediaPipe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [instruction, setInstruction] = useState("Click 'Allow Camera' to begin");
-  const [verificationRecord, setVerificationRecord] =
-    useState<VerificationSessionResponse | null>(null);
+  const [verificationRecord, setVerificationRecord] = useState<VerificationSessionResponse | null>(
+    null,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [verificationFailed, setVerificationFailed] = useState(false);
   const [faceCount, setFaceCount] = useState(0);
@@ -192,7 +192,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
       resultsRef.current.failure_reason = msg;
       markStep("camera_permission", "failed");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advanceTo, markStep]);
 
   // ---------------------------------------------------------------------------
@@ -260,8 +260,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
               const maxX = Math.max(...xs);
               const minY = Math.min(...ys);
               const maxY = Math.max(...ys);
-              ctx.strokeStyle =
-                faces.length > 1 ? "#f87171" : "#34d399";
+              ctx.strokeStyle = faces.length > 1 ? "#f87171" : "#34d399";
               ctx.lineWidth = 2;
               ctx.strokeRect(minX - 10, minY - 10, maxX - minX + 20, maxY - minY + 20);
             }
@@ -328,7 +327,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
     };
 
     animFrameRef.current = requestAnimationFrame(detect);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advanceTo, markStep]);
 
   // ---------------------------------------------------------------------------
@@ -358,8 +357,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
         setVerificationRecord(completed);
         markStep("complete", completed.liveness_passed ? "passed" : "failed");
       } catch (err: unknown) {
-        const msg =
-          err instanceof Error ? err.message : "Failed to submit verification results";
+        const msg = err instanceof Error ? err.message : "Failed to submit verification results";
         setError(msg);
         markStep("complete", "failed");
       } finally {
@@ -368,7 +366,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
     };
 
     submit();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, sessionId]);
 
   // ---------------------------------------------------------------------------
@@ -427,7 +425,8 @@ function CameraVerificationContent({ searchParams }: PageProps) {
   // Derived state
   // ---------------------------------------------------------------------------
   const isVerified = verificationRecord?.liveness_passed === true;
-  const isFailed = currentStep === "complete" && verificationRecord && !verificationRecord.liveness_passed;
+  const isFailed =
+    currentStep === "complete" && verificationRecord && !verificationRecord.liveness_passed;
 
   // ---------------------------------------------------------------------------
   // Render
@@ -445,11 +444,10 @@ function CameraVerificationContent({ searchParams }: PageProps) {
             <Camera className="h-8 w-8 text-violet-400" />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white">
-              Liveness Verification
-            </h2>
+            <h2 className="text-xl font-bold tracking-tight text-white">Liveness Verification</h2>
             <p className="mt-1 text-xs text-slate-500">
-              AI-powered face detection runs entirely in your browser — no data is sent to any server.
+              AI-powered face detection runs entirely in your browser — no data is sent to any
+              server.
             </p>
           </div>
         </header>
@@ -466,10 +464,10 @@ function CameraVerificationContent({ searchParams }: PageProps) {
                       st === "passed"
                         ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
                         : st === "failed"
-                        ? "border-rose-500 bg-rose-500/20 text-rose-400"
-                        : st === "active"
-                        ? "border-violet-500 bg-violet-500/20 text-violet-300 shadow-[0_0_8px_rgba(139,92,246,0.5)]"
-                        : "border-slate-700 bg-slate-800 text-slate-600"
+                          ? "border-rose-500 bg-rose-500/20 text-rose-400"
+                          : st === "active"
+                            ? "border-violet-500 bg-violet-500/20 text-violet-300 shadow-[0_0_8px_rgba(139,92,246,0.5)]"
+                            : "border-slate-700 bg-slate-800 text-slate-600"
                     }`}
                   >
                     {st === "passed" ? "✓" : st === "failed" ? "✗" : i + 1}
@@ -484,7 +482,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
-                    className={`h-px flex-1 mx-1 transition-colors duration-500 ${
+                    className={`mx-1 h-px flex-1 transition-colors duration-500 ${
                       stepStatuses[STEPS[i + 1].key] !== "pending"
                         ? "bg-violet-600/40"
                         : "bg-slate-800"
@@ -497,12 +495,11 @@ function CameraVerificationContent({ searchParams }: PageProps) {
         </div>
 
         {/* Main card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 space-y-5">
-
+        <div className="space-y-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-6">
           {/* Error Banner */}
           {error && (
             <div className="flex items-start gap-3 rounded-lg border border-rose-500/20 bg-rose-600/10 p-4 text-xs text-rose-400">
-              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -516,7 +513,8 @@ function CameraVerificationContent({ searchParams }: PageProps) {
               <div>
                 <p className="text-sm font-semibold text-white">Allow Camera Access</p>
                 <p className="mt-1 text-xs text-slate-500">
-                  Your camera is used for face detection. No images or video are stored or transmitted.
+                  Your camera is used for face detection. No images or video are stored or
+                  transmitted.
                 </p>
               </div>
               <button
@@ -551,25 +549,25 @@ function CameraVerificationContent({ searchParams }: PageProps) {
                 />
                 <canvas
                   ref={canvasRef}
-                  className="absolute inset-0 w-full h-full scale-x-[-1]"
+                  className="absolute inset-0 h-full w-full scale-x-[-1]"
                   width={640}
                   height={480}
                 />
                 {/* Face count badge */}
                 <div
-                  className={`absolute top-2 right-2 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                  className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-bold ${
                     faceCount === 1
                       ? "bg-emerald-600/80 text-emerald-100"
                       : faceCount > 1
-                      ? "bg-rose-600/80 text-rose-100"
-                      : "bg-slate-700/80 text-slate-300"
+                        ? "bg-rose-600/80 text-rose-100"
+                        : "bg-slate-700/80 text-slate-300"
                   }`}
                 >
                   {faceCount === 0
                     ? "No face"
                     : faceCount === 1
-                    ? "1 face ✓"
-                    : `${faceCount} faces!`}
+                      ? "1 face ✓"
+                      : `${faceCount} faces!`}
                 </div>
               </div>
 
@@ -579,7 +577,7 @@ function CameraVerificationContent({ searchParams }: PageProps) {
                   <Eye className="h-5 w-5 shrink-0 text-violet-400" />
                 )}
                 {currentStep === "blink_detection" && (
-                  <Eye className="h-5 w-5 shrink-0 text-amber-400 animate-pulse" />
+                  <Eye className="h-5 w-5 shrink-0 animate-pulse text-amber-400" />
                 )}
                 {currentStep === "smile_detection" && (
                   <Smile className="h-5 w-5 shrink-0 text-emerald-400" />
@@ -671,9 +669,12 @@ function CameraVerificationContent({ searchParams }: PageProps) {
                 { label: "Blink Verified", val: verificationRecord.blink_verified },
                 { label: "Smile Verified", val: verificationRecord.smile_verified },
               ].map(({ label, val }) => (
-                <div key={label} className="flex justify-between border-b border-slate-900/60 pb-1.5 last:border-0 last:pb-0">
+                <div
+                  key={label}
+                  className="flex justify-between border-b border-slate-900/60 pb-1.5 last:border-0 last:pb-0"
+                >
                   <span className="text-slate-400">{label}</span>
-                  <span className={val ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                  <span className={val ? "font-bold text-emerald-400" : "font-bold text-rose-400"}>
                     {val ? "✓ Pass" : "✗ Fail"}
                   </span>
                 </div>

@@ -3,7 +3,11 @@
 import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { ProtectedRoute } from "../../../../../components/ProtectedRoute";
-import { apiService, AttendanceRecordResponse, SessionAttendanceSummary } from "../../../../../services/api";
+import {
+  apiService,
+  AttendanceRecordResponse,
+  SessionAttendanceSummary,
+} from "../../../../../services/api";
 import {
   ArrowLeft,
   Users,
@@ -57,7 +61,10 @@ function AdminAttendanceContent({ params }: PageProps) {
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
         <AlertCircle className="h-10 w-10 text-rose-400" />
         <p className="text-sm text-slate-400">{error || "No data found"}</p>
-        <Link href={`/admin/sessions/${sessionId}`} className="text-xs text-indigo-400 hover:underline">
+        <Link
+          href={`/admin/sessions/${sessionId}`}
+          className="text-xs text-indigo-400 hover:underline"
+        >
           ← Back to Session
         </Link>
       </div>
@@ -66,19 +73,27 @@ function AdminAttendanceContent({ params }: PageProps) {
 
   const statusIcon = (status: string) => {
     switch (status) {
-      case "PRESENT": return <CheckCircle className="h-4 w-4 text-emerald-400" />;
-      case "FLAGGED": return <AlertTriangle className="h-4 w-4 text-amber-400" />;
-      case "REJECTED": return <XCircle className="h-4 w-4 text-rose-400" />;
-      default: return null;
+      case "PRESENT":
+        return <CheckCircle className="h-4 w-4 text-emerald-400" />;
+      case "FLAGGED":
+        return <AlertTriangle className="h-4 w-4 text-amber-400" />;
+      case "REJECTED":
+        return <XCircle className="h-4 w-4 text-rose-400" />;
+      default:
+        return null;
     }
   };
 
   const statusColor = (status: string) => {
     switch (status) {
-      case "PRESENT": return "border-emerald-800/40 bg-emerald-950/30 text-emerald-400";
-      case "FLAGGED": return "border-amber-800/40 bg-amber-950/30 text-amber-400";
-      case "REJECTED": return "border-rose-800/40 bg-rose-950/30 text-rose-400";
-      default: return "border-slate-800 bg-slate-900 text-slate-400";
+      case "PRESENT":
+        return "border-emerald-800/40 bg-emerald-950/30 text-emerald-400";
+      case "FLAGGED":
+        return "border-amber-800/40 bg-amber-950/30 text-amber-400";
+      case "REJECTED":
+        return "border-rose-800/40 bg-rose-950/30 text-rose-400";
+      default:
+        return "border-slate-800 bg-slate-900 text-slate-400";
     }
   };
 
@@ -114,14 +129,36 @@ function AdminAttendanceContent({ params }: PageProps) {
         {/* Stats grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Total", value: summary.total, color: "text-white", bg: "bg-slate-900 border-slate-800" },
-            { label: "Present", value: summary.present, color: "text-emerald-400", bg: "bg-emerald-950/30 border-emerald-800/40" },
-            { label: "Flagged", value: summary.flagged, color: "text-amber-400", bg: "bg-amber-950/30 border-amber-800/40" },
-            { label: "Rejected", value: summary.rejected, color: "text-rose-400", bg: "bg-rose-950/30 border-rose-800/40" },
+            {
+              label: "Total",
+              value: summary.total,
+              color: "text-white",
+              bg: "bg-slate-900 border-slate-800",
+            },
+            {
+              label: "Present",
+              value: summary.present,
+              color: "text-emerald-400",
+              bg: "bg-emerald-950/30 border-emerald-800/40",
+            },
+            {
+              label: "Flagged",
+              value: summary.flagged,
+              color: "text-amber-400",
+              bg: "bg-amber-950/30 border-amber-800/40",
+            },
+            {
+              label: "Rejected",
+              value: summary.rejected,
+              color: "text-rose-400",
+              bg: "bg-rose-950/30 border-rose-800/40",
+            },
           ].map(({ label, value, color, bg }) => (
             <div key={label} className={`rounded-xl border p-4 text-center ${bg}`}>
               <p className={`text-2xl font-bold ${color}`}>{value}</p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                {label}
+              </p>
             </div>
           ))}
         </div>
@@ -159,11 +196,16 @@ function AdminAttendanceContent({ params }: PageProps) {
           ) : (
             <div className="divide-y divide-slate-900/60">
               {summary.records.map((record: AttendanceRecordResponse) => (
-                <div key={record.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                  key={record.id}
+                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div className="flex items-center gap-3">
                     {statusIcon(record.status)}
                     <div>
-                      <p className="text-[11px] font-bold text-white">Student #{record.student_id}</p>
+                      <p className="text-[11px] font-bold text-white">
+                        Student #{record.student_id}
+                      </p>
                       <p className="text-[10px] text-slate-500">
                         {new Date(record.submitted_at).toLocaleString()}
                       </p>
@@ -171,19 +213,30 @@ function AdminAttendanceContent({ params }: PageProps) {
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {/* Prereq icons */}
-                    <span title="Location" className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${record.location_validation_id ? "bg-emerald-900/40 text-emerald-400" : "bg-slate-900 text-slate-600"}`}>
-                      <MapPin className="inline h-2.5 w-2.5 mr-0.5" />
+                    <span
+                      title="Location"
+                      className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${record.location_validation_id ? "bg-emerald-900/40 text-emerald-400" : "bg-slate-900 text-slate-600"}`}
+                    >
+                      <MapPin className="mr-0.5 inline h-2.5 w-2.5" />
                       Loc
                     </span>
-                    <span title="Liveness" className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${record.verification_session_id ? "bg-emerald-900/40 text-emerald-400" : "bg-slate-900 text-slate-600"}`}>
-                      <ShieldCheck className="inline h-2.5 w-2.5 mr-0.5" />
+                    <span
+                      title="Liveness"
+                      className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${record.verification_session_id ? "bg-emerald-900/40 text-emerald-400" : "bg-slate-900 text-slate-600"}`}
+                    >
+                      <ShieldCheck className="mr-0.5 inline h-2.5 w-2.5" />
                       Live
                     </span>
-                    <span title="Selfie" className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${record.evidence_id ? "bg-emerald-900/40 text-emerald-400" : "bg-slate-900 text-slate-600"}`}>
-                      <Camera className="inline h-2.5 w-2.5 mr-0.5" />
+                    <span
+                      title="Selfie"
+                      className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${record.evidence_id ? "bg-emerald-900/40 text-emerald-400" : "bg-slate-900 text-slate-600"}`}
+                    >
+                      <Camera className="mr-0.5 inline h-2.5 w-2.5" />
                       Selfie
                     </span>
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusColor(record.status)}`}>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusColor(record.status)}`}
+                    >
                       {record.status}
                     </span>
                   </div>

@@ -48,7 +48,7 @@ function AuditDetailsContent() {
   const getRoleBadge = (role: string | null) => {
     if (!role) {
       return (
-        <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-slate-400 border border-slate-800">
+        <span className="inline-flex items-center gap-1 rounded border border-slate-800 bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-slate-400">
           <Server className="h-3 w-3" />
           SYSTEM
         </span>
@@ -58,28 +58,28 @@ function AuditDetailsContent() {
     switch (role.toUpperCase()) {
       case "ADMIN":
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold text-indigo-400 border border-indigo-500/20">
+          <span className="inline-flex items-center gap-1 rounded border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold text-indigo-400">
             <Shield className="h-3 w-3" />
             ADMIN
           </span>
         );
       case "DEVELOPER":
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">
+          <span className="inline-flex items-center gap-1 rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">
             <Activity className="h-3 w-3" />
             DEV
           </span>
         );
       case "STUDENT":
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
+          <span className="inline-flex items-center gap-1 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
             <User className="h-3 w-3" />
             STUDENT
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 rounded bg-slate-500/10 px-2 py-0.5 text-[10px] font-bold text-slate-400 border border-slate-500/20">
+          <span className="inline-flex items-center gap-1 rounded border border-slate-500/20 bg-slate-500/10 px-2 py-0.5 text-[10px] font-bold text-slate-400">
             {role.toUpperCase()}
           </span>
         );
@@ -97,11 +97,11 @@ function AuditDetailsContent() {
   if (error || !log) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
-        <AlertCircle className="h-10 w-10 text-rose-400 animate-pulse" />
+        <AlertCircle className="h-10 w-10 animate-pulse text-rose-400" />
         <p className="text-sm text-slate-400">{error || "Failed to load audit entry details."}</p>
         <button
           onClick={() => router.push("/admin/audit")}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500 cursor-pointer"
+          className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500"
         >
           Back to Audit Trail
         </button>
@@ -141,30 +141,34 @@ function AuditDetailsContent() {
         {/* Detailed Panels Grid */}
         <main className="space-y-6">
           {/* Main info card */}
-          <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-6 space-y-6">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider pb-2 border-b border-slate-900/60">
+          <div className="glass-panel space-y-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+            <h3 className="border-b border-slate-900/60 pb-2 text-xs font-bold uppercase tracking-wider text-white">
               Action Description
             </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="space-y-4">
-                <div className="flex gap-3 items-start">
-                  <Clock className="h-4 w-4 text-slate-500 mt-0.5" />
+                <div className="flex items-start gap-3">
+                  <Clock className="mt-0.5 h-4 w-4 text-slate-500" />
                   <div>
-                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Timestamp</h4>
-                    <p className="mt-1 text-xs font-mono text-slate-300">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Timestamp
+                    </h4>
+                    <p className="mt-1 font-mono text-xs text-slate-300">
                       {new Date(log.created_at).toLocaleString()}
                     </p>
-                    <p className="text-[9px] text-slate-500 font-mono mt-0.5">
+                    <p className="mt-0.5 font-mono text-[9px] text-slate-500">
                       {new Date(log.created_at).toISOString()} (UTC)
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-3 items-start">
-                  <User className="h-4 w-4 text-slate-500 mt-0.5" />
+                <div className="flex items-start gap-3">
+                  <User className="mt-0.5 h-4 w-4 text-slate-500" />
                   <div>
-                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Actor / Performed By</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Actor / Performed By
+                    </h4>
                     <p className="mt-1 text-xs font-bold text-white">
                       {log.actor_name || "System automated event"}
                     </p>
@@ -174,27 +178,37 @@ function AuditDetailsContent() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex gap-3 items-start">
-                  <Activity className="h-4 w-4 text-slate-500 mt-0.5" />
+                <div className="flex items-start gap-3">
+                  <Activity className="mt-0.5 h-4 w-4 text-slate-500" />
                   <div>
-                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Action Type</h4>
-                    <span className="inline-block mt-1 rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-xs font-mono font-bold text-indigo-400">
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Action Type
+                    </h4>
+                    <span className="mt-1 inline-block rounded border border-slate-800 bg-slate-900 px-2 py-0.5 font-mono text-xs font-bold text-indigo-400">
                       {log.action_type}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex gap-3 items-start">
-                  <Database className="h-4 w-4 text-slate-500 mt-0.5" />
+                <div className="flex items-start gap-3">
+                  <Database className="mt-0.5 h-4 w-4 text-slate-500" />
                   <div>
-                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Affected Entity</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Affected Entity
+                    </h4>
                     {log.entity_type ? (
                       <p className="mt-1 text-xs text-slate-300">
-                        Type: <span className="font-mono text-indigo-300 bg-slate-900 px-1 py-0.2 rounded text-[10px]">{log.entity_type}</span>
+                        Type:{" "}
+                        <span className="py-0.2 rounded bg-slate-900 px-1 font-mono text-[10px] text-indigo-300">
+                          {log.entity_type}
+                        </span>
                         {log.entity_id !== null && (
                           <>
                             {" "}
-                            ID: <span className="font-mono text-indigo-300 bg-slate-900 px-1 py-0.2 rounded text-[10px]">#{log.entity_id}</span>
+                            ID:{" "}
+                            <span className="py-0.2 rounded bg-slate-900 px-1 font-mono text-[10px] text-indigo-300">
+                              #{log.entity_id}
+                            </span>
                           </>
                         )}
                       </p>
@@ -206,8 +220,10 @@ function AuditDetailsContent() {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-900/60">
-              <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Detailed Description</h4>
+            <div className="border-t border-slate-900/60 pt-2">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Detailed Description
+              </h4>
               <div className="mt-2 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 text-xs leading-relaxed text-slate-200">
                 {log.description}
               </div>
@@ -215,26 +231,30 @@ function AuditDetailsContent() {
           </div>
 
           {/* Client Details Panel */}
-          <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-6 space-y-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider pb-2 border-b border-slate-900/60">
+          <div className="glass-panel space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+            <h3 className="border-b border-slate-900/60 pb-2 text-xs font-bold uppercase tracking-wider text-white">
               Client & Network Metadata
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex gap-3 items-start">
-                <Globe className="h-4 w-4 text-slate-500 mt-0.5" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="flex items-start gap-3">
+                <Globe className="mt-0.5 h-4 w-4 text-slate-500" />
                 <div>
-                  <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">IP Address</h4>
-                  <p className="mt-1 text-xs font-mono text-slate-350">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    IP Address
+                  </h4>
+                  <p className="text-slate-350 mt-1 font-mono text-xs">
                     {log.ip_address || "None recorded"}
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-3 items-start">
-                <Monitor className="h-4 w-4 text-slate-500 mt-0.5" />
+              <div className="flex items-start gap-3">
+                <Monitor className="mt-0.5 h-4 w-4 text-slate-500" />
                 <div>
-                  <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">User-Agent Header</h4>
-                  <p className="mt-1 text-xs text-slate-350 leading-relaxed text-[11px] break-all font-mono">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    User-Agent Header
+                  </h4>
+                  <p className="text-slate-355 mt-1 break-all font-mono text-[11px] text-xs leading-relaxed">
                     {log.user_agent || "None recorded"}
                   </p>
                 </div>
@@ -243,21 +263,23 @@ function AuditDetailsContent() {
           </div>
 
           {/* Metadata JSON Block */}
-          <div className="glass-panel rounded-2xl border border-slate-800 bg-slate-950/40 p-6 space-y-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider pb-2 border-b border-slate-900/60">
+          <div className="glass-panel space-y-4 rounded-2xl border border-slate-800 bg-slate-950/40 p-6">
+            <h3 className="border-b border-slate-900/60 pb-2 text-xs font-bold uppercase tracking-wider text-white">
               Audit Payload Metadata (JSON)
             </h3>
             {log.metadata_json && Object.keys(log.metadata_json).length > 0 ? (
-              <div className="rounded-xl border border-slate-900 bg-slate-950 overflow-hidden font-mono text-[10px] leading-relaxed">
-                <div className="bg-slate-900/60 border-b border-slate-900 px-4 py-2 text-slate-500 text-[9px] font-bold uppercase select-none">
+              <div className="overflow-hidden rounded-xl border border-slate-900 bg-slate-950 font-mono text-[10px] leading-relaxed">
+                <div className="select-none border-b border-slate-900 bg-slate-900/60 px-4 py-2 text-[9px] font-bold uppercase text-slate-500">
                   Payload content
                 </div>
-                <pre className="p-4 overflow-x-auto text-indigo-300">
+                <pre className="overflow-x-auto p-4 text-indigo-300">
                   {JSON.stringify(log.metadata_json, null, 2)}
                 </pre>
               </div>
             ) : (
-              <p className="text-xs text-slate-500 italic">No additional payload metadata exists for this action.</p>
+              <p className="text-xs italic text-slate-500">
+                No additional payload metadata exists for this action.
+              </p>
             )}
           </div>
         </main>

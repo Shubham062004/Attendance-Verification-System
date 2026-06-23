@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
@@ -40,7 +41,12 @@ def get_audit_logs(
         end_date=end_date,
         search=search,
     )
-    return AuditLogPaginatedResponse(items=items, total=total, page=page, size=size)
+    return AuditLogPaginatedResponse(
+        items=[AuditLogResponse.model_validate(item) for item in items],
+        total=total,
+        page=page,
+        size=size
+    )
 
 
 @router.get("/export", dependencies=[admin_or_dev_required])
@@ -74,7 +80,7 @@ def export_audit_logs(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
-        )
+        ) from e
 
     current_date = datetime.now(UTC).strftime("%Y-%m-%d")
     

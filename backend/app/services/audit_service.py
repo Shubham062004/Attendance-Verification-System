@@ -1,19 +1,20 @@
 import csv
 import io
-from datetime import datetime, time, UTC
+from datetime import UTC, datetime, time
 from typing import Any
 
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.utils import get_column_letter
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
+
 from app.models.audit import AuditLog
 
 
@@ -22,9 +23,9 @@ class NumberedCanvas(canvas.Canvas):
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
 
-    def showPage(self):
+    def showPage(self):  # noqa: N802
         self._saved_page_states.append(dict(self.__dict__))
-        self._startPage()
+        self._startPage()  # type: ignore
 
     def save(self):
         num_pages = len(self._saved_page_states)
@@ -49,7 +50,7 @@ class NumberedCanvas(canvas.Canvas):
         # Draw footer
         self.setFont("Helvetica", 8)
         self.drawString(inch, 0.4 * inch, f"Generated on {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')} UTC")
-        self.drawRightString(7.5 * inch, 0.4 * inch, f"Page {self._pageNumber} of {page_count}")
+        self.drawRightString(7.5 * inch, 0.4 * inch, f"Page {self._pageNumber} of {page_count}")  # type: ignore
         self.restoreState()
 
 
@@ -227,6 +228,7 @@ class AuditService:
     def _generate_excel(logs: list[AuditLog]) -> bytes:
         wb = openpyxl.Workbook()
         ws = wb.active
+        assert ws is not None
         ws.title = "Audit Logs"
 
         headers = [
@@ -267,9 +269,11 @@ class AuditService:
 
         for col in ws.columns:
             max_len = 0
-            col_letter = openpyxl.utils.get_column_letter(col[0].column)
+            col_index = col[0].column
+            assert col_index is not None
+            col_letter = get_column_letter(col_index)
             for cell in col:
-                if cell.row > 1:
+                if cell.row and cell.row > 1:
                     cell.font = Font(name="Calibri", size=10)
                     if cell.column in (1, 3, 5, 6, 8):
                         cell.alignment = center_align
@@ -328,7 +332,7 @@ class AuditService:
             alignment=0
         ))
 
-        story = []
+        story: list[Any] = []
         story.append(Spacer(1, 10))
         story.append(Paragraph("System Audit Trail Report", styles["ReportTitle"]))
         story.append(Spacer(1, 10))
