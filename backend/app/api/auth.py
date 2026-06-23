@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -11,6 +13,8 @@ from app.schemas.user import StudentRegister, UserResponse
 from app.utils.auth import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
+
+logger = logging.getLogger("app.api.auth")
 
 
 def verify_google_id_token(id_token: str) -> dict:
@@ -42,8 +46,15 @@ def verify_google_id_token(id_token: str) -> dict:
 
         # Verify audience if client id is set
         if settings.GOOGLE_CLIENT_ID and data.get("aud") != settings.GOOGLE_CLIENT_ID:
-            # We can log warning or raise exception. For ease of testing, let's log warning or check.
-            pass
+            logger.warning(
+                f"Google ID token audience mismatch: expected {settings.GOOGLE_CLIENT_ID}, "
+                f"got {data.get('aud')}"
+            )
+            if settings.is_production:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Google ID token audience mismatch",
+                )
 
         return data
     except requests.RequestException as e:

@@ -1,0 +1,6 @@
+# Pinned Development, Linting, and Type Hinting Dependencies
+ruff==0.15.18
+black==26.5.1
+isort==8.0.1
+mypy==2.1.0
+types-python-dateutil==2.9.0.20260518
