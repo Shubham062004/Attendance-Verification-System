@@ -9,6 +9,7 @@ from app.api.evidence import router as evidence_router
 from app.api.health import router as health_router
 from app.api.location import router as location_router
 from app.api.qr import router as qr_router
+from app.api.reports import router as reports_router
 from app.api.sessions import router as sessions_router
 from app.api.users import router as users_router
 from app.api.verification import router as verification_router
@@ -56,6 +57,7 @@ app.include_router(evidence_router)
 app.include_router(attendance_router)
 app.include_router(risk_router)
 app.include_router(admin_router)
+app.include_router(reports_router)
 
 
 @app.on_event("startup")
