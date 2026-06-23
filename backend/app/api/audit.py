@@ -4,13 +4,45 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.audit import AuditLogPaginatedResponse, AuditLogResponse
+from app.models.user import User
+from app.schemas.audit import AnalyticsEventRequest, AuditLogPaginatedResponse, AuditLogResponse
 from app.services.audit_service import AuditService
-from app.utils.auth import RoleChecker
+from app.utils.auth import RoleChecker, get_current_user
 
 router = APIRouter(prefix="/audit", tags=["audit"])
 
 admin_or_dev_required = Depends(RoleChecker(["Admin", "Developer"]))
+
+
+@router.post("/log", status_code=status.HTTP_201_CREATED)
+def log_analytics_event(
+    payload: AnalyticsEventRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Log a frontend analytics event to the audit trail.
+    Accessible by any authenticated user (Student, Admin, Developer).
+    Used by the post-attendance success screen to track:
+      - Success Screen Viewed
+      - Weather Loaded
+      - GIF Displayed
+      - Hydration Reminder Displayed
+    """
+    AuditService.log_action(
+        db=db,
+        actor_id=int(current_user.id),
+        actor_name=current_user.name,
+        actor_role=current_user.role,
+        action_type=payload.action_type,
+        entity_type="SuccessScreen",
+        entity_id=None,
+        description=payload.description,
+        metadata_json=payload.metadata_json,
+    )
+    return {"status": "logged"}
+
+
 
 
 @router.get("", response_model=AuditLogPaginatedResponse, dependencies=[admin_or_dev_required])

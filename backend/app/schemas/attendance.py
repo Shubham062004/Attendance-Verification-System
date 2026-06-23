@@ -49,3 +49,8 @@ class SessionAttendanceSummary(BaseModel):
     flagged: int
     rejected: int
     records: list[AttendanceRecordResponse]
+
+
+class AttendanceStreakResponse(BaseModel):
+    """Student's current consecutive daily attendance streak."""
+    streak: int
