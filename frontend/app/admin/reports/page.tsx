@@ -185,6 +185,13 @@ function ReportsDashboardContent() {
                 <span>Manage Attendance</span>
               </Link>
               <Link
+                href="/admin/sessions"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
+              >
+                <Calendar className="h-4 w-4 text-blue-400" />
+                <span>Manage Sessions</span>
+              </Link>
+              <Link
                 href="/admin/history"
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:bg-slate-900/60 hover:text-slate-200"
               >
