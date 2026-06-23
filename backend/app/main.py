@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.attendance import router as attendance_router
 from app.api.risk import router as risk_router
+from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.evidence import router as evidence_router
 from app.api.health import router as health_router
@@ -54,6 +55,7 @@ app.include_router(verification_router)
 app.include_router(evidence_router)
 app.include_router(attendance_router)
 app.include_router(risk_router)
+app.include_router(admin_router)
 
 
 @app.on_event("startup")

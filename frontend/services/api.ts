@@ -375,7 +375,116 @@ export const apiService = {
       body: JSON.stringify({ status, notes }),
     });
   },
+
+  // Admin APIs
+  async getAdminStats(): Promise<DashboardStatsResponse> {
+    return request<DashboardStatsResponse>("/admin/stats");
+  },
+
+  async getAllAttendanceRecords(): Promise<AdminAttendanceRecordListItem[]> {
+    return request<AdminAttendanceRecordListItem[]>("/admin/attendance");
+  },
+
+  async getStudentsHistory(): Promise<StudentHistoryResponse[]> {
+    return request<StudentHistoryResponse[]>("/admin/students");
+  },
+
+  async getStudentDetail(id: number): Promise<StudentDetailResponse> {
+    return request<StudentDetailResponse>(`/admin/students/${id}`);
+  },
+
+  async addAttendanceManually(studentId: number, sessionId: number, status: string, notes?: string): Promise<any> {
+    return request<any>("/admin/attendance/add", {
+      method: "POST",
+      body: JSON.stringify({ student_id: studentId, session_id: sessionId, status, notes }),
+    });
+  },
+
+  async overrideAttendanceRecord(id: number, status: string, notes?: string, isTechnicalIssue?: boolean): Promise<any> {
+    return request<any>(`/admin/attendance/${id}/override`, {
+      method: "POST",
+      body: JSON.stringify({ status, notes, is_technical_issue: isTechnicalIssue }),
+    });
+  },
+
+  async removeAttendanceRecord(id: number): Promise<any> {
+    return request<any>(`/admin/attendance/${id}`, {
+      method: "DELETE",
+    });
+  },
 };
+
+export interface TodaySessionOverview {
+  id: number;
+  title: string;
+  subject: string;
+  class_name: string;
+  start_time: string | null;
+  end_time: string | null;
+  status: string;
+  present_count: number;
+  absent_count: number;
+  attendance_percentage: number;
+}
+
+export interface AdminAttendanceRecordListItem {
+  id: number;
+  student_id: number;
+  student_name: string | null;
+  student_reg_number: string | null;
+  session_id: number;
+  session_title: string;
+  status: "PRESENT" | "FLAGGED" | "REJECTED";
+  submitted_at: string;
+  risk_score: number | null;
+  risk_level: "SAFE" | "REVIEW" | "HIGH_RISK" | null;
+}
+
+export interface DashboardStatsResponse {
+  total_students: number;
+  present_today: number;
+  absent_today: number;
+  attendance_percentage_today: number;
+  active_session_status: string | null;
+  pending_risk_reviews: number;
+  total_attendance_records: number;
+  today_sessions: TodaySessionOverview[];
+}
+
+export interface StudentHistoryResponse {
+  id: number;
+  name: string | null;
+  email: string;
+  registration_number: string | null;
+  attendance_percentage: number;
+  present_count: number;
+  absent_count: number;
+  last_attendance: string | null;
+}
+
+export interface StudentAttendanceHistoryItem {
+  id: number | null;
+  session_id: number;
+  session_title: string;
+  session_subject: string;
+  submitted_at: string | null;
+  status: "PRESENT" | "FLAGGED" | "REJECTED" | "ABSENT";
+  risk_score: number | null;
+  risk_level: string | null;
+  notes: string | null;
+}
+
+export interface StudentDetailResponse {
+  id: number;
+  name: string | null;
+  email: string;
+  registration_number: string | null;
+  attendance_percentage: number;
+  present_sessions: number;
+  absent_sessions: number;
+  total_sessions: number;
+  history: StudentAttendanceHistoryItem[];
+}
 
 export interface AttendanceFlag {
   id: number;

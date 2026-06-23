@@ -102,15 +102,40 @@ function StudentAttendanceInner() {
 
         {/* Quick stats */}
         {records.length > 0 && (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "Total", value: records.length, color: "text-white", bg: "bg-slate-900 border-slate-800" },
-              { label: "Present", value: totalPresent, color: "text-emerald-400", bg: "bg-emerald-950/30 border-emerald-800/40" },
-              { label: "Flagged", value: totalFlagged, color: "text-amber-400", bg: "bg-amber-950/30 border-amber-800/40" },
+              {
+                label: "Attendance %",
+                value: `${Math.round(
+                  (records.filter((r) => r.status === "PRESENT" || r.status === "FLAGGED").length /
+                    records.length) *
+                    100
+                )}%`,
+                color: "text-indigo-400",
+                bg: "bg-indigo-950/20 border-indigo-900/40",
+              },
+              {
+                label: "Present",
+                value: records.filter((r) => r.status === "PRESENT" || r.status === "FLAGGED").length,
+                color: "text-emerald-400",
+                bg: "bg-emerald-950/30 border-emerald-800/40",
+              },
+              {
+                label: "Absent / Rejected",
+                value: records.filter((r) => r.status === "REJECTED").length,
+                color: "text-rose-400",
+                bg: "bg-rose-950/30 border-rose-800/40",
+              },
+              {
+                label: "Total Sessions",
+                value: records.length,
+                color: "text-white",
+                bg: "bg-slate-900 border-slate-800",
+              },
             ].map(({ label, value, color, bg }) => (
               <div key={label} className={`rounded-xl border p-4 text-center ${bg}`}>
                 <p className={`text-xl font-bold ${color}`}>{value}</p>
-                <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+                <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
               </div>
             ))}
           </div>
