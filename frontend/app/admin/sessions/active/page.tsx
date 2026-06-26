@@ -14,6 +14,7 @@ import {
   Users,
   CheckCircle,
   AlertCircle,
+  QrCode,
 } from "lucide-react";
 
 function ActiveSessionContent() {
@@ -48,20 +49,20 @@ function ActiveSessionContent() {
 
     const updateTimer = () => {
       const now = Date.now();
-      const difference = now - startTime;
+      const elapsedSeconds = Math.floor((now - startTime) / 1000);
+      const totalSessionDurationSeconds = 5 * 60; // 5 minutes
+      const remainingSeconds = totalSessionDurationSeconds - elapsedSeconds;
 
-      if (difference < 0) {
-        setElapsedTime("00:00:00");
+      if (remainingSeconds <= 0) {
+        setElapsedTime("00:00");
         return;
       }
 
-      const totalSec = Math.floor(difference / 1000);
-      const hours = Math.floor(totalSec / 3600);
-      const minutes = Math.floor((totalSec % 3600) / 60);
-      const seconds = totalSec % 60;
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
 
       const format = (num: number) => String(num).padStart(2, "0");
-      setElapsedTime(`${format(hours)}:${format(minutes)}:${format(seconds)}`);
+      setElapsedTime(`${format(minutes)}:${format(seconds)}`);
     };
 
     updateTimer();
@@ -141,18 +142,28 @@ function ActiveSessionContent() {
             {/* Live Timer Counter Box */}
             <div className="glass-panel relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60 p-8">
               <div className="absolute right-0 top-0 h-40 w-40 animate-pulse rounded-full bg-emerald-500/5 blur-3xl" />
-              <div>
-                <div className="mb-4 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
-                  <span>Live duration</span>
-                  <span className="flex h-2 w-2 animate-ping rounded-full bg-emerald-500" />
+              <div className="flex flex-col gap-6">
+                <div>
+                  <div className="mb-4 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <span>Time Remaining</span>
+                    <span className="flex h-2 w-2 animate-ping rounded-full bg-emerald-500" />
+                  </div>
+                  <div className="font-mono text-4xl font-extrabold tracking-tight text-emerald-400">
+                    {elapsedTime || "05:00"}
+                  </div>
+                  <p className="mt-2 text-[10px] text-slate-500">
+                    Session started at{" "}
+                    {session.start_time ? new Date(session.start_time).toLocaleTimeString() : "--"}
+                  </p>
                 </div>
-                <div className="font-mono text-4xl font-extrabold tracking-tight text-emerald-400">
-                  {elapsedTime || "00:00:00"}
-                </div>
-                <p className="mt-2 text-[10px] text-slate-500">
-                  Session started at{" "}
-                  {session.start_time ? new Date(session.start_time).toLocaleTimeString() : "--"}
-                </p>
+
+                <Link
+                  href={`/admin/sessions/${session.id}/qr`}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-blue-500 bg-blue-600/15 py-3 text-xs font-bold text-blue-400 transition hover:bg-blue-600/25"
+                >
+                  <QrCode className="h-4 w-4" />
+                  <span>Display QR Code</span>
+                </Link>
               </div>
 
               <button

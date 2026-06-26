@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  // Standalone mode is only needed when running in a Docker container.
+  // Vercel handles its own serverless packaging.
+  output: process.env.IS_DOCKER ? "standalone" : undefined,
   images: {
     remotePatterns: [
       {
